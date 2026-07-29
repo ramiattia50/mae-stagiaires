@@ -1,6 +1,7 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
 import Dashboard from "./pages/Dashboard";
+import Login from "./pages/Login";
 
 function PagePlaceholder({ titre }) {
   return (
@@ -11,17 +12,35 @@ function PagePlaceholder({ titre }) {
   );
 }
 
+function RequireAuth({ children }) {
+  const token = window.localStorage.getItem("mae_token");
+  if (!token) {
+    return <Navigate to="/connexion" replace />;
+  }
+  return children;
+}
+
 export default function App() {
   return (
-    <div className="flex min-h-screen bg-[#F7F8FA]">
-      <Sidebar />
-      <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/candidatures" element={<PagePlaceholder titre="Candidatures" />} />
-        <Route path="/stagiaires" element={<PagePlaceholder titre="Stagiaires" />} />
-        <Route path="/evaluations" element={<PagePlaceholder titre="Évaluations" />} />
-        <Route path="/departements" element={<PagePlaceholder titre="Départements" />} />
-      </Routes>
-    </div>
+    <Routes>
+      <Route path="/connexion" element={<Login />} />
+      <Route
+        path="/*"
+        element={
+          <RequireAuth>
+            <div className="flex min-h-screen bg-[#F7F8FA]">
+              <Sidebar />
+              <Routes>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/candidatures" element={<PagePlaceholder titre="Candidatures" />} />
+                <Route path="/stagiaires" element={<PagePlaceholder titre="Stagiaires" />} />
+                <Route path="/evaluations" element={<PagePlaceholder titre="Evaluations" />} />
+                <Route path="/departements" element={<PagePlaceholder titre="Departements" />} />
+              </Routes>
+            </div>
+          </RequireAuth>
+        }
+      />
+    </Routes>
   );
 }

@@ -5,3 +5,5 @@ dist/
 .DS_Store
 .vscode/
 .idea/
+backend/prisma/dev.db
+backend/prisma/migrations/
