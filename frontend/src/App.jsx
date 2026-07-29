@@ -2,6 +2,9 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
+import Stagiaires from "./pages/Stagiaires";
+import StagiaireFiche from "./pages/StagiaireFiche";
+import Candidatures from "./pages/Candidatures";
 
 function PagePlaceholder({ titre }) {
   return (
@@ -32,8 +35,9 @@ export default function App() {
               <Sidebar />
               <Routes>
                 <Route path="/" element={<Dashboard />} />
-                <Route path="/candidatures" element={<PagePlaceholder titre="Candidatures" />} />
-                <Route path="/stagiaires" element={<PagePlaceholder titre="Stagiaires" />} />
+                <Route path="/candidatures" element={<Candidatures />} />
+                <Route path="/stagiaires" element={<Stagiaires />} />
+                <Route path="/stagiaires/:id" element={<StagiaireFiche />} />
                 <Route path="/evaluations" element={<PagePlaceholder titre="Evaluations" />} />
                 <Route path="/departements" element={<PagePlaceholder titre="Departements" />} />
               </Routes>
