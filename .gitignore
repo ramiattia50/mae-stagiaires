@@ -7,3 +7,4 @@ dist/
 .idea/
 backend/prisma/dev.db
 backend/prisma/migrations/
+backend/uploads/documents/*.pdf

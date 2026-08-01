@@ -8,6 +8,8 @@ import stagiairesRoutes from "./routes/stagiaires.routes.js";
 import evaluationsRoutes from "./routes/evaluations.routes.js";
 import departementsRoutes from "./routes/departements.routes.js";
 import dashboardRoutes from "./routes/dashboard.routes.js";
+import utilisateursRoutes from "./routes/utilisateurs.routes.js";
+import documentsRoutes from "./routes/documents.routes.js";
 
 dotenv.config();
 
@@ -27,6 +29,8 @@ app.use("/api/stagiaires", stagiairesRoutes);
 app.use("/api/evaluations", evaluationsRoutes);
 app.use("/api/departements", departementsRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/utilisateurs", utilisateursRoutes);
+app.use("/api/documents", documentsRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err);

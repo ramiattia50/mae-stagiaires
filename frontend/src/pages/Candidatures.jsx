@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../api/client";
+import AffectationForm from "../components/AffectationForm";
 
 const STATUT_LABELS = {
   DEPOSEE: { label: "Deposee", color: "text-slate-500", bg: "bg-slate-100" },
@@ -22,6 +23,7 @@ export default function Candidatures() {
   const [filtreStatut, setFiltreStatut] = useState("");
   const [loading, setLoading] = useState(true);
   const [actionEnCours, setActionEnCours] = useState(null);
+  const [candidatureAAffecter, setCandidatureAAffecter] = useState(null);
 
   function charger() {
     setLoading(true);
@@ -132,6 +134,17 @@ export default function Candidatures() {
                           </button>
                         </div>
                       )}
+                      {c.statut === "ACCEPTEE" && !c.stagiaire && (
+                        <button
+                          onClick={() => setCandidatureAAffecter(c)}
+                          className="text-xs text-mae-blue font-medium underline"
+                        >
+                          Affecter
+                        </button>
+                      )}
+                      {c.statut === "ACCEPTEE" && c.stagiaire && (
+                        <span className="text-xs text-slate-400">Deja affecte</span>
+                      )}
                     </td>
                   </tr>
                 ))
@@ -140,6 +153,17 @@ export default function Candidatures() {
           </table>
         )}
       </div>
+
+      {candidatureAAffecter && (
+        <AffectationForm
+          candidature={candidatureAAffecter}
+          onClose={() => setCandidatureAAffecter(null)}
+          onSuccess={() => {
+            setCandidatureAAffecter(null);
+            charger();
+          }}
+        />
+      )}
     </main>
   );
 }

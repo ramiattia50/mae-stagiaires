@@ -5,6 +5,16 @@ import { requireAuth, requireRole } from "../middleware/auth.js";
 
 const router = Router();
 
+function calculerStatut(dateDebut, dateFin) {
+  const maintenant = new Date();
+  const debut = new Date(dateDebut);
+  const fin = new Date(dateFin);
+
+  if (maintenant < debut) return "A_VENIR";
+  if (maintenant > fin) return "TERMINE";
+  return "EN_COURS";
+}
+
 const creationSchema = z.object({
   candidatureId: z.number(),
   departementId: z.number(),
@@ -29,6 +39,7 @@ router.post("/", requireAuth, requireRole("RESPONSABLE_RH", "ADMIN"), async (req
         tuteurId,
         dateDebut: new Date(dateDebut),
         dateFin: new Date(dateFin),
+        statut: calculerStatut(dateDebut, dateFin),
       },
     });
 
@@ -49,7 +60,6 @@ router.get("/", requireAuth, async (req, res) => {
   const stagiaires = await prisma.stagiaire.findMany({
     where: {
       departementId: departementId ? Number(departementId) : undefined,
-      statut: statut || undefined,
     },
     include: {
       candidature: { include: { candidat: { select: { nom: true, prenom: true, email: true } } } },
@@ -59,7 +69,14 @@ router.get("/", requireAuth, async (req, res) => {
     orderBy: { dateDebut: "desc" },
   });
 
-  res.json(stagiaires);
+  const avecStatutRecalcule = stagiaires.map((s) => ({
+    ...s,
+    statut: calculerStatut(s.dateDebut, s.dateFin),
+  }));
+
+  const resultat = statut ? avecStatutRecalcule.filter((s) => s.statut === statut) : avecStatutRecalcule;
+
+  res.json(resultat);
 });
 
 router.get("/:id", requireAuth, async (req, res) => {
@@ -79,7 +96,7 @@ router.get("/:id", requireAuth, async (req, res) => {
     return res.status(404).json({ message: "Stagiaire introuvable." });
   }
 
-  res.json(stagiaire);
+  res.json({ ...stagiaire, statut: calculerStatut(stagiaire.dateDebut, stagiaire.dateFin) });
 });
 
 router.post("/:id/presences", requireAuth, requireRole("TUTEUR", "RESPONSABLE_RH", "ADMIN"), async (req, res) => {

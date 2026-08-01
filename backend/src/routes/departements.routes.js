@@ -13,7 +13,7 @@ router.get("/", requireAuth, async (req, res) => {
   res.json(departements);
 });
 
-router.post("/", requireAuth, requireRole("ADMIN"), async (req, res) => {
+router.post("/", requireAuth, requireRole("RESPONSABLE_RH", "ADMIN"), async (req, res) => {
   const { nom, description } = req.body;
 
   if (!nom) {

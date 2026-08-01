@@ -85,7 +85,7 @@ export default function Dashboard() {
               <ResponsiveContainer width="100%" height={190}>
                 <BarChart data={stats?.parDepartement ?? []} barSize={28}>
                   <XAxis dataKey="departement" tick={{ fontSize: 12, fill: "#64748B" }} axisLine={{ stroke: "#E5E7EB" }} tickLine={false} />
-                  <YAxis tick={{ fontSize: 12, fill: "#64748B" }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 12, fill: "#64748B" }} axisLine={false} tickLine={false} allowDecimals={false} />
                   <Tooltip contentStyle={{ fontSize: "12px", borderRadius: "8px", border: "1px solid #E5E7EB" }} />
                   <Bar dataKey="nombre" fill="#2D8577" radius={[4, 4, 0, 0]} />
                 </BarChart>
@@ -170,3 +170,4 @@ export default function Dashboard() {
     </main>
   );
 }
+

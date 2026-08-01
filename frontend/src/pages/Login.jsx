@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import api from "../api/client";
 
 export default function Login() {
@@ -15,7 +15,12 @@ export default function Login() {
       const res = await api.post("/auth/connexion", { email, motDePasse });
       window.localStorage.setItem("mae_token", res.data.token);
       window.localStorage.setItem("mae_utilisateur", JSON.stringify(res.data.utilisateur));
-      navigate("/");
+
+      if (res.data.utilisateur.role === "CANDIDAT") {
+        navigate("/espace-candidat");
+      } else {
+        navigate("/");
+      }
     } catch (err) {
       setErreur("Identifiants incorrects ou serveur indisponible.");
     }
@@ -25,7 +30,7 @@ export default function Login() {
     <div className="flex items-center justify-center min-h-screen bg-slate-50">
       <form onSubmit={handleSubmit} className="bg-white border border-slate-200 rounded-xl p-8 w-96">
         <h1 className="font-display text-xl font-bold text-mae-blue mb-1">MAE Assurances</h1>
-        <p className="text-sm text-slate-500 mb-6">Connexion au Pole Richesse Humaine</p>
+        <p className="text-sm text-slate-500 mb-6">Connexion</p>
 
         {erreur && (
           <div className="mb-4 px-3 py-2 rounded-lg bg-red-50 text-red-600 text-sm">{erreur}</div>
@@ -53,6 +58,10 @@ export default function Login() {
         >
           Se connecter
         </button>
+
+        <p className="text-xs text-slate-500 mt-4 text-center">
+          Pas encore de compte ? <Link to="/inscription" className="text-mae-teal font-medium">Creer un compte candidat</Link>
+        </p>
       </form>
     </div>
   );

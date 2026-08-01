@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Mail, Building2, User, Calendar } from "lucide-react";
+import { ArrowLeft, Mail, Building2, User, Calendar, FileText, Download } from "lucide-react";
 import api from "../api/client";
 import StatutBadge from "../components/StatutBadge";
 
@@ -10,14 +10,40 @@ export default function StagiaireFiche() {
   const [stagiaire, setStagiaire] = useState(null);
   const [loading, setLoading] = useState(true);
   const [erreur, setErreur] = useState(null);
+  const [generationEnCours, setGenerationEnCours] = useState(null);
 
-  useEffect(() => {
+  function charger() {
     api
       .get(`/stagiaires/${id}`)
       .then((res) => setStagiaire(res.data))
       .catch(() => setErreur("Impossible de charger ce stagiaire."))
       .finally(() => setLoading(false));
-  }, [id]);
+  }
+
+  useEffect(charger, [id]);
+
+  async function genererDocument(type) {
+    setGenerationEnCours(type);
+    try {
+      await api.post(`/documents/${id}/${type}`);
+      charger();
+    } catch (err) {
+      alert("Erreur lors de la generation du document.");
+    } finally {
+      setGenerationEnCours(null);
+    }
+  }
+
+  async function telecharger(documentId, nomFichier) {
+    const res = await api.get(`/documents/download/${documentId}`, { responseType: "blob" });
+    const url = window.URL.createObjectURL(new Blob([res.data]));
+    const lien = document.createElement("a");
+    lien.href = url;
+    lien.setAttribute("download", nomFichier);
+    document.body.appendChild(lien);
+    lien.click();
+    lien.remove();
+  }
 
   if (loading) {
     return <main className="flex-1 px-8 py-7"><p className="text-sm text-slate-400">Chargement...</p></main>;
@@ -28,6 +54,8 @@ export default function StagiaireFiche() {
   }
 
   const candidat = stagiaire.candidature?.candidat;
+  const conventionExiste = stagiaire.documents?.some((d) => d.type === "CONVENTION");
+  const attestationExiste = stagiaire.documents?.some((d) => d.type === "ATTESTATION");
 
   return (
     <main className="flex-1 px-8 py-7 overflow-auto">
@@ -69,6 +97,52 @@ export default function StagiaireFiche() {
         </div>
 
         <div className="bg-white border border-slate-200 rounded-xl px-5 py-5">
+          <p className="font-display text-sm font-semibold text-mae-blue mb-4">Documents</p>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-slate-600">Convention de stage</span>
+              <button
+                disabled={generationEnCours === "convention"}
+                onClick={() => genererDocument("convention")}
+                className="text-xs text-mae-teal font-medium flex items-center gap-1 disabled:opacity-50"
+              >
+                <FileText size={13} /> {conventionExiste ? "Regenerer" : "Generer"}
+              </button>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-slate-600">Attestation de stage</span>
+              <button
+                disabled={generationEnCours === "attestation"}
+                onClick={() => genererDocument("attestation")}
+                className="text-xs text-mae-teal font-medium flex items-center gap-1 disabled:opacity-50"
+              >
+                <FileText size={13} /> {attestationExiste ? "Regenerer" : "Generer"}
+              </button>
+            </div>
+
+            {stagiaire.documents?.length > 0 && (
+              <div className="pt-3 border-t border-slate-100 space-y-2">
+                {stagiaire.documents.map((d) => (
+                  <div key={d.id} className="flex items-center justify-between">
+                    <span className="text-xs text-slate-500">
+                      {d.type === "CONVENTION" ? "Convention" : "Attestation"} - {new Date(d.dateGeneration).toLocaleDateString("fr-FR")}
+                    </span>
+                    <button
+                      onClick={() => telecharger(d.id, d.cheminFichier)}
+                      className="text-xs text-mae-blue font-medium flex items-center gap-1"
+                    >
+                      <Download size={12} /> Telecharger
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 mb-6">
+        <div className="bg-white border border-slate-200 rounded-xl px-5 py-5">
           <p className="font-display text-sm font-semibold text-mae-blue mb-4">Evaluations</p>
           {stagiaire.evaluations?.length === 0 ? (
             <p className="text-sm text-slate-400">Aucune evaluation pour le moment.</p>
@@ -83,37 +157,22 @@ export default function StagiaireFiche() {
             </div>
           )}
         </div>
-      </div>
 
-      <div className="bg-white border border-slate-200 rounded-xl px-5 py-5">
-        <p className="font-display text-sm font-semibold text-mae-blue mb-4">Historique de presence</p>
-        {stagiaire.presences?.length === 0 ? (
-          <p className="text-sm text-slate-400">Aucune presence enregistree.</p>
-        ) : (
-          <table className="w-full border-collapse">
-            <thead>
-              <tr>
-                {["Date", "Statut", "Arrivee", "Depart"].map((h) => (
-                  <th key={h} className="text-left text-[11px] font-semibold text-slate-400 uppercase tracking-wide px-2.5 py-2 border-b border-slate-100">
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {stagiaire.presences.map((p) => (
-                <tr key={p.id}>
-                  <td className="px-2.5 py-2.5 text-sm text-slate-600 border-b border-slate-50">
-                    {new Date(p.date).toLocaleDateString("fr-FR")}
-                  </td>
-                  <td className="px-2.5 py-2.5 text-sm text-slate-600 border-b border-slate-50">{p.statut}</td>
-                  <td className="px-2.5 py-2.5 text-sm text-slate-600 border-b border-slate-50">{p.heureArrivee ?? "-"}</td>
-                  <td className="px-2.5 py-2.5 text-sm text-slate-600 border-b border-slate-50">{p.heureDepart ?? "-"}</td>
-                </tr>
+        <div className="bg-white border border-slate-200 rounded-xl px-5 py-5">
+          <p className="font-display text-sm font-semibold text-mae-blue mb-4">Historique de presence</p>
+          {stagiaire.presences?.length === 0 ? (
+            <p className="text-sm text-slate-400">Aucune presence enregistree.</p>
+          ) : (
+            <div className="space-y-2">
+              {stagiaire.presences.slice(0, 5).map((p) => (
+                <div key={p.id} className="flex justify-between items-center text-sm border-b border-slate-50 pb-2">
+                  <span className="text-slate-600">{new Date(p.date).toLocaleDateString("fr-FR")}</span>
+                  <span className="text-slate-500">{p.statut}</span>
+                </div>
               ))}
-            </tbody>
-          </table>
-        )}
+            </div>
+          )}
+        </div>
       </div>
     </main>
   );

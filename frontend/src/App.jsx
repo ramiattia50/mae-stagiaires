@@ -2,17 +2,17 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
+import Inscription from "./pages/Inscription";
+import EspaceCandidat from "./pages/EspaceCandidat";
 import Stagiaires from "./pages/Stagiaires";
 import StagiaireFiche from "./pages/StagiaireFiche";
 import Candidatures from "./pages/Candidatures";
+import Departements from "./pages/Departements";
+import Evaluations from "./pages/Evaluations";
 
-function PagePlaceholder({ titre }) {
-  return (
-    <main className="flex-1 px-8 py-7">
-      <h1 className="font-display text-[22px] font-bold text-mae-blue">{titre}</h1>
-      <p className="text-sm text-slate-500 mt-2">Module en construction.</p>
-    </main>
-  );
+function getUtilisateur() {
+  const brut = window.localStorage.getItem("mae_utilisateur");
+  return brut ? JSON.parse(brut) : null;
 }
 
 function RequireAuth({ children }) {
@@ -23,25 +23,46 @@ function RequireAuth({ children }) {
   return children;
 }
 
+function RequireRH({ children }) {
+  const utilisateur = getUtilisateur();
+  if (!utilisateur || !["RESPONSABLE_RH", "ADMIN"].includes(utilisateur.role)) {
+    return <Navigate to="/espace-candidat" replace />;
+  }
+  return children;
+}
+
 export default function App() {
   return (
     <Routes>
       <Route path="/connexion" element={<Login />} />
+      <Route path="/inscription" element={<Inscription />} />
+
+      <Route
+        path="/espace-candidat"
+        element={
+          <RequireAuth>
+            <EspaceCandidat />
+          </RequireAuth>
+        }
+      />
+
       <Route
         path="/*"
         element={
           <RequireAuth>
-            <div className="flex min-h-screen bg-[#F7F8FA]">
-              <Sidebar />
-              <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/candidatures" element={<Candidatures />} />
-                <Route path="/stagiaires" element={<Stagiaires />} />
-                <Route path="/stagiaires/:id" element={<StagiaireFiche />} />
-                <Route path="/evaluations" element={<PagePlaceholder titre="Evaluations" />} />
-                <Route path="/departements" element={<PagePlaceholder titre="Departements" />} />
-              </Routes>
-            </div>
+            <RequireRH>
+              <div className="flex min-h-screen bg-[#F7F8FA]">
+                <Sidebar />
+                <Routes>
+                  <Route path="/" element={<Dashboard />} />
+                  <Route path="/candidatures" element={<Candidatures />} />
+                  <Route path="/stagiaires" element={<Stagiaires />} />
+                  <Route path="/stagiaires/:id" element={<StagiaireFiche />} />
+                  <Route path="/evaluations" element={<Evaluations />} />
+                  <Route path="/departements" element={<Departements />} />
+                </Routes>
+              </div>
+            </RequireRH>
           </RequireAuth>
         }
       />

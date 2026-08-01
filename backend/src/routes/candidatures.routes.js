@@ -38,6 +38,7 @@ router.get("/", requireAuth, requireRole("RESPONSABLE_RH", "ADMIN"), async (req,
     include: {
       candidat: { select: { nom: true, prenom: true, email: true } },
       piecesJointes: true,
+      stagiaire: { select: { id: true } },
     },
     orderBy: { dateDepot: "desc" },
   });
