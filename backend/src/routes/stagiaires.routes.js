@@ -57,14 +57,18 @@ router.post("/", requireAuth, requireRole("RESPONSABLE_RH", "ADMIN"), async (req
 router.get("/", requireAuth, async (req, res) => {
   const { departementId, statut } = req.query;
 
+  const filtreTuteur = req.user.role === "TUTEUR" ? { tuteurId: req.user.id } : {};
+
   const stagiaires = await prisma.stagiaire.findMany({
     where: {
       departementId: departementId ? Number(departementId) : undefined,
+      ...filtreTuteur,
     },
     include: {
       candidature: { include: { candidat: { select: { nom: true, prenom: true, email: true } } } },
       departement: true,
       tuteur: { select: { id: true, nom: true, prenom: true } },
+      evaluations: { where: req.user.role === "TUTEUR" ? { tuteurId: req.user.id } : undefined },
     },
     orderBy: { dateDebut: "desc" },
   });

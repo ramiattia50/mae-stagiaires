@@ -4,6 +4,7 @@ import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
 import Inscription from "./pages/Inscription";
 import EspaceCandidat from "./pages/EspaceCandidat";
+import EspaceTuteur from "./pages/EspaceTuteur";
 import Stagiaires from "./pages/Stagiaires";
 import StagiaireFiche from "./pages/StagiaireFiche";
 import Candidatures from "./pages/Candidatures";
@@ -26,6 +27,7 @@ function RequireAuth({ children }) {
 function RequireRH({ children }) {
   const utilisateur = getUtilisateur();
   if (!utilisateur || !["RESPONSABLE_RH", "ADMIN"].includes(utilisateur.role)) {
+    if (utilisateur?.role === "TUTEUR") return <Navigate to="/espace-tuteur" replace />;
     return <Navigate to="/espace-candidat" replace />;
   }
   return children;
@@ -42,6 +44,15 @@ export default function App() {
         element={
           <RequireAuth>
             <EspaceCandidat />
+          </RequireAuth>
+        }
+      />
+
+      <Route
+        path="/espace-tuteur"
+        element={
+          <RequireAuth>
+            <EspaceTuteur />
           </RequireAuth>
         }
       />

@@ -40,7 +40,7 @@ Application web developpee pour digitaliser et centraliser la gestion des stagia
 **Evaluation**
 - File d attente de validation cote RH (valider / renvoyer pour revision)
 - Historique des evaluations par stagiaire
-- *Formulaire de saisie cote tuteur : en cours de developpement*
+- Formulaire de saisie cote tuteur (espace tuteur dedie)
 
 **Tableau de bord**
 - Nombre de stagiaires par departement, repartition par type de stage
@@ -112,3 +112,5 @@ Le schema complet est defini dans [`backend/prisma/schema.prisma`](backend/prism
 ## Licence
 
 Distribue sous licence MIT - voir [`LICENSE`](LICENSE).
+
+

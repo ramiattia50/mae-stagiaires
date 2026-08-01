@@ -16,8 +16,11 @@ export default function Login() {
       window.localStorage.setItem("mae_token", res.data.token);
       window.localStorage.setItem("mae_utilisateur", JSON.stringify(res.data.utilisateur));
 
-      if (res.data.utilisateur.role === "CANDIDAT") {
+      const role = res.data.utilisateur.role;
+      if (role === "CANDIDAT") {
         navigate("/espace-candidat");
+      } else if (role === "TUTEUR") {
+        navigate("/espace-tuteur");
       } else {
         navigate("/");
       }
