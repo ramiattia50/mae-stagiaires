@@ -31,6 +31,8 @@ export default function EspaceCandidat() {
   const [sujetStage, setSujetStage] = useState("");
   const [dateDebutSouhaitee, setDateDebutSouhaitee] = useState("");
   const [dateFinSouhaitee, setDateFinSouhaitee] = useState("");
+  const [fichierCV, setFichierCV] = useState(null);
+  const [fichierLettre, setFichierLettre] = useState(null);
   const [enCours, setEnCours] = useState(false);
   const [erreur, setErreur] = useState("");
 
@@ -47,6 +49,15 @@ export default function EspaceCandidat() {
     navigate("/connexion");
   }
 
+  async function uploaderPiece(candidatureId, fichier, type) {
+    const formData = new FormData();
+    formData.append("fichier", fichier);
+    formData.append("type", type);
+    await api.post(`/pieces-jointes/${candidatureId}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     setErreur("");
@@ -56,11 +67,18 @@ export default function EspaceCandidat() {
     }
     setEnCours(true);
     try {
-      await api.post("/candidatures", { typeStage, sujetStage, dateDebutSouhaitee, dateFinSouhaitee });
+      const res = await api.post("/candidatures", { typeStage, sujetStage, dateDebutSouhaitee, dateFinSouhaitee });
+      const candidatureId = res.data.id;
+
+      if (fichierCV) await uploaderPiece(candidatureId, fichierCV, "CV");
+      if (fichierLettre) await uploaderPiece(candidatureId, fichierLettre, "LETTRE_MOTIVATION");
+
       setAfficherForm(false);
       setSujetStage("");
       setDateDebutSouhaitee("");
       setDateFinSouhaitee("");
+      setFichierCV(null);
+      setFichierLettre(null);
       charger();
     } catch (err) {
       setErreur("Erreur lors du depot de la candidature.");
@@ -104,14 +122,25 @@ export default function EspaceCandidat() {
         ) : (
           <div className="space-y-3">
             {candidatures.map((c) => (
-              <div key={c.id} className="bg-white border border-slate-200 rounded-xl px-5 py-4 flex justify-between items-center">
-                <div>
-                  <p className="text-sm font-medium text-mae-blue">{c.sujetStage || c.typeStage}</p>
-                  <p className="text-xs text-slate-400 mt-0.5">
-                    {c.typeStage} - Depose le {new Date(c.dateDepot).toLocaleDateString("fr-FR")}
-                  </p>
+              <div key={c.id} className="bg-white border border-slate-200 rounded-xl px-5 py-4">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="text-sm font-medium text-mae-blue">{c.sujetStage || c.typeStage}</p>
+                    <p className="text-xs text-slate-400 mt-0.5">
+                      {c.typeStage} - Depose le {new Date(c.dateDepot).toLocaleDateString("fr-FR")}
+                    </p>
+                  </div>
+                  <StatutBadge statut={c.statut} />
                 </div>
-                <StatutBadge statut={c.statut} />
+                {c.piecesJointes?.length > 0 && (
+                  <div className="mt-3 pt-3 border-t border-slate-100 flex gap-4">
+                    {c.piecesJointes.map((p) => (
+                      <span key={p.id} className="text-xs text-slate-500">
+                        {p.type === "CV" ? "CV joint" : "Lettre de motivation jointe"}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -119,8 +148,8 @@ export default function EspaceCandidat() {
       </main>
 
       {afficherForm && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-          <form onSubmit={handleSubmit} className="bg-white rounded-xl p-6 w-96 shadow-xl">
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 py-8">
+          <form onSubmit={handleSubmit} className="bg-white rounded-xl p-6 w-96 shadow-xl max-h-[90vh] overflow-y-auto">
             <h2 className="font-display text-lg font-bold text-mae-blue mb-4">Deposer une candidature</h2>
 
             {erreur && (
@@ -147,7 +176,7 @@ export default function EspaceCandidat() {
               placeholder="Ex: Application de gestion des stagiaires"
             />
 
-            <div className="flex gap-2 mb-4">
+            <div className="flex gap-2 mb-3">
               <div className="flex-1">
                 <label className="block text-sm text-slate-600 mb-1">Debut souhaite</label>
                 <input
@@ -167,6 +196,22 @@ export default function EspaceCandidat() {
                 />
               </div>
             </div>
+
+            <label className="block text-sm text-slate-600 mb-1">CV (PDF, DOC)</label>
+            <input
+              type="file"
+              accept=".pdf,.doc,.docx"
+              onChange={(e) => setFichierCV(e.target.files[0])}
+              className="w-full text-sm mb-3"
+            />
+
+            <label className="block text-sm text-slate-600 mb-1">Lettre de motivation (PDF, DOC)</label>
+            <input
+              type="file"
+              accept=".pdf,.doc,.docx"
+              onChange={(e) => setFichierLettre(e.target.files[0])}
+              className="w-full text-sm mb-4"
+            />
 
             <div className="flex gap-2">
               <button

@@ -7,8 +7,11 @@ export default function EspaceTuteur() {
   const [stagiaires, setStagiaires] = useState([]);
   const [loading, setLoading] = useState(true);
   const [stagiaireAEvaluer, setStagiaireAEvaluer] = useState(null);
+  const [stagiaireAPointer, setStagiaireAPointer] = useState(null);
   const [note, setNote] = useState("");
   const [commentaire, setCommentaire] = useState("");
+  const [datePresence, setDatePresence] = useState(new Date().toISOString().slice(0, 10));
+  const [statutPresence, setStatutPresence] = useState("PRESENT");
   const [enCours, setEnCours] = useState(false);
   const [erreur, setErreur] = useState("");
   const navigate = useNavigate();
@@ -29,10 +32,17 @@ export default function EspaceTuteur() {
     navigate("/connexion");
   }
 
-  function ouvrirFormulaire(stagiaire) {
+  function ouvrirFormulaireEvaluation(stagiaire) {
     setStagiaireAEvaluer(stagiaire);
     setNote("");
     setCommentaire("");
+    setErreur("");
+  }
+
+  function ouvrirFormulairePresence(stagiaire) {
+    setStagiaireAPointer(stagiaire);
+    setDatePresence(new Date().toISOString().slice(0, 10));
+    setStatutPresence("PRESENT");
     setErreur("");
   }
 
@@ -55,6 +65,24 @@ export default function EspaceTuteur() {
       charger();
     } catch (err) {
       setErreur("Erreur lors de lenvoi de levaluation.");
+    } finally {
+      setEnCours(false);
+    }
+  }
+
+  async function soumettrePresence(e) {
+    e.preventDefault();
+    setErreur("");
+    setEnCours(true);
+    try {
+      await api.post(`/stagiaires/${stagiaireAPointer.id}/presences`, {
+        date: datePresence,
+        statut: statutPresence,
+      });
+      setStagiaireAPointer(null);
+      charger();
+    } catch (err) {
+      setErreur("Erreur lors de lenregistrement de la presence.");
     } finally {
       setEnCours(false);
     }
@@ -100,7 +128,13 @@ export default function EspaceTuteur() {
                   <div className="flex items-center gap-3">
                     <StatutBadge statut={s.statut} />
                     <button
-                      onClick={() => ouvrirFormulaire(s)}
+                      onClick={() => ouvrirFormulairePresence(s)}
+                      className="text-xs text-mae-blue font-medium underline"
+                    >
+                      Pointer presence
+                    </button>
+                    <button
+                      onClick={() => ouvrirFormulaireEvaluation(s)}
                       className="text-xs text-mae-teal font-medium underline"
                     >
                       {dejaEvalue ? "Evaluer a nouveau" : "Evaluer"}
@@ -112,6 +146,58 @@ export default function EspaceTuteur() {
           </div>
         )}
       </main>
+
+      {stagiaireAPointer && (
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+          <form onSubmit={soumettrePresence} className="bg-white rounded-xl p-6 w-96 shadow-xl">
+            <h2 className="font-display text-lg font-bold text-mae-blue mb-1">Pointer la presence</h2>
+            <p className="text-sm text-slate-500 mb-4">
+              {stagiaireAPointer.candidature?.candidat?.prenom} {stagiaireAPointer.candidature?.candidat?.nom}
+            </p>
+
+            {erreur && (
+              <div className="mb-3 px-3 py-2 rounded-lg bg-red-50 text-red-600 text-sm">{erreur}</div>
+            )}
+
+            <label className="block text-sm text-slate-600 mb-1">Date</label>
+            <input
+              type="date"
+              value={datePresence}
+              onChange={(e) => setDatePresence(e.target.value)}
+              className="w-full border border-slate-300 rounded-lg px-3 py-2 mb-3 text-sm"
+            />
+
+            <label className="block text-sm text-slate-600 mb-1">Statut</label>
+            <select
+              value={statutPresence}
+              onChange={(e) => setStatutPresence(e.target.value)}
+              className="w-full border border-slate-300 rounded-lg px-3 py-2 mb-4 text-sm"
+            >
+              <option value="PRESENT">Present</option>
+              <option value="ABSENT">Absent</option>
+              <option value="RETARD">Retard</option>
+              <option value="JUSTIFIE">Justifie</option>
+            </select>
+
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setStagiaireAPointer(null)}
+                className="flex-1 border border-slate-300 rounded-lg py-2 text-sm font-medium text-slate-600"
+              >
+                Annuler
+              </button>
+              <button
+                type="submit"
+                disabled={enCours}
+                className="flex-1 bg-mae-blue text-white rounded-lg py-2 text-sm font-medium disabled:opacity-50"
+              >
+                Enregistrer
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
 
       {stagiaireAEvaluer && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">

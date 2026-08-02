@@ -10,6 +10,7 @@ import departementsRoutes from "./routes/departements.routes.js";
 import dashboardRoutes from "./routes/dashboard.routes.js";
 import utilisateursRoutes from "./routes/utilisateurs.routes.js";
 import documentsRoutes from "./routes/documents.routes.js";
+import piecesJointesRoutes from "./routes/piecesJointes.routes.js";
 
 dotenv.config();
 
@@ -31,6 +32,7 @@ app.use("/api/departements", departementsRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/utilisateurs", utilisateursRoutes);
 app.use("/api/documents", documentsRoutes);
+app.use("/api/pieces-jointes", piecesJointesRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err);
