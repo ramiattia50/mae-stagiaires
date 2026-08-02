@@ -4,6 +4,8 @@ Application web developpee pour digitaliser et centraliser la gestion des stagia
 
 > Projet realise dans le cadre d un stage - conception (UML, modele de donnees, architecture) puis developpement full-stack.
 
+**Demo en ligne** : https://mae-stagiaires.vercel.app (compte demo : rh@mae.tn / motdepasse123)
+
 ## Apercu
 
 ### Tableau de bord
@@ -112,5 +114,6 @@ Le schema complet est defini dans [`backend/prisma/schema.prisma`](backend/prism
 ## Licence
 
 Distribue sous licence MIT - voir [`LICENSE`](LICENSE).
+
 
 
