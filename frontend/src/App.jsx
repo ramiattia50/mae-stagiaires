@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { Menu } from "lucide-react";
 import Sidebar from "./components/Sidebar";
 import UserMenu from "./components/UserMenu";
+import { ToastProvider } from "./components/ToastProvider";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
 import Inscription from "./pages/Inscription";
@@ -60,47 +61,49 @@ function RHLayout({ children }) {
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/connexion" element={<Login />} />
-      <Route path="/inscription" element={<Inscription />} />
+    <ToastProvider>
+      <Routes>
+        <Route path="/connexion" element={<Login />} />
+        <Route path="/inscription" element={<Inscription />} />
 
-      <Route
-        path="/espace-candidat"
-        element={
-          <RequireAuth>
-            <EspaceCandidat />
-          </RequireAuth>
-        }
-      />
+        <Route
+          path="/espace-candidat"
+          element={
+            <RequireAuth>
+              <EspaceCandidat />
+            </RequireAuth>
+          }
+        />
 
-      <Route
-        path="/espace-tuteur"
-        element={
-          <RequireAuth>
-            <EspaceTuteur />
-          </RequireAuth>
-        }
-      />
+        <Route
+          path="/espace-tuteur"
+          element={
+            <RequireAuth>
+              <EspaceTuteur />
+            </RequireAuth>
+          }
+        />
 
-      <Route
-        path="/*"
-        element={
-          <RequireAuth>
-            <RequireRH>
-              <RHLayout>
-                <Routes>
-                  <Route path="/" element={<Dashboard />} />
-                  <Route path="/candidatures" element={<Candidatures />} />
-                  <Route path="/stagiaires" element={<Stagiaires />} />
-                  <Route path="/stagiaires/:id" element={<StagiaireFiche />} />
-                  <Route path="/evaluations" element={<Evaluations />} />
-                  <Route path="/departements" element={<Departements />} />
-                </Routes>
-              </RHLayout>
-            </RequireRH>
-          </RequireAuth>
-        }
-      />
-    </Routes>
+        <Route
+          path="/*"
+          element={
+            <RequireAuth>
+              <RequireRH>
+                <RHLayout>
+                  <Routes>
+                    <Route path="/" element={<Dashboard />} />
+                    <Route path="/candidatures" element={<Candidatures />} />
+                    <Route path="/stagiaires" element={<Stagiaires />} />
+                    <Route path="/stagiaires/:id" element={<StagiaireFiche />} />
+                    <Route path="/evaluations" element={<Evaluations />} />
+                    <Route path="/departements" element={<Departements />} />
+                  </Routes>
+                </RHLayout>
+              </RequireRH>
+            </RequireAuth>
+          }
+        />
+      </Routes>
+    </ToastProvider>
   );
 }

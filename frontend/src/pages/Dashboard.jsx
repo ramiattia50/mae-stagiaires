@@ -6,6 +6,7 @@ import {
 import api from "../api/client";
 import StatutBadge from "../components/StatutBadge";
 import UserMenu from "../components/UserMenu";
+import { SkeletonBar, SkeletonCard, SkeletonRow } from "../components/Skeleton";
 
 const PIE_COLORS = ["#0B3D62", "#2D8577", "#D97706", "#94A3B8"];
 
@@ -67,7 +68,24 @@ export default function Dashboard() {
       )}
 
       {loading ? (
-        <p className="text-sm text-slate-400">Chargement...</p>
+        <>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+            {Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)}
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-4 mb-6">
+            <div className="bg-white border border-slate-200/70 rounded-2xl px-5 py-5 shadow-sm h-[254px] flex items-end gap-3">
+              {[60, 90, 40, 75, 50].map((h, i) => (
+                <SkeletonBar key={i} width="16%" height={`${h}%`} className="rounded-t-lg rounded-b-none" />
+              ))}
+            </div>
+            <div className="bg-white border border-slate-200/70 rounded-2xl px-5 py-5 shadow-sm flex items-center justify-center h-[254px]">
+              <div className="w-28 h-28 rounded-full bg-gradient-to-r from-slate-100 via-slate-200 to-slate-100 bg-[length:200%_100%] animate-shimmer" />
+            </div>
+          </div>
+          <div className="bg-white border border-slate-200/70 rounded-2xl px-5 py-2 shadow-sm">
+            {Array.from({ length: 4 }).map((_, i) => <SkeletonRow key={i} cols={5} />)}
+          </div>
+        </>
       ) : (
         <>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">

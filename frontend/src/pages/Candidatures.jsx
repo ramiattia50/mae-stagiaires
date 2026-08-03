@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
+import { Inbox } from "lucide-react";
 import api from "../api/client";
 import AffectationForm from "../components/AffectationForm";
+import { SkeletonListCard, SkeletonRow } from "../components/Skeleton";
+import { useToast } from "../components/ToastProvider";
 
 const STATUT_LABELS = {
   DEPOSEE: { label: "Deposee", color: "text-slate-500", bg: "bg-slate-100" },
@@ -69,6 +72,7 @@ export default function Candidatures() {
   const [loading, setLoading] = useState(true);
   const [actionEnCours, setActionEnCours] = useState(null);
   const [candidatureAAffecter, setCandidatureAAffecter] = useState(null);
+  const toast = useToast();
 
   function charger() {
     setLoading(true);
@@ -87,9 +91,10 @@ export default function Candidatures() {
     setActionEnCours(id);
     try {
       await api.patch(`/candidatures/${id}/statut`, { statut });
+      toast.success("Statut de la candidature mis a jour.");
       charger();
     } catch (err) {
-      alert("Erreur lors du changement de statut.");
+      toast.error("Erreur lors du changement de statut.");
     } finally {
       setActionEnCours(null);
     }
@@ -115,10 +120,21 @@ export default function Candidatures() {
       </select>
 
       {loading ? (
-        <p className="text-sm text-slate-400">Chargement...</p>
+        <>
+          <div className="hidden md:block bg-white border border-slate-200/70 rounded-2xl px-5 py-2 shadow-sm">
+            {Array.from({ length: 4 }).map((_, i) => <SkeletonRow key={i} cols={6} />)}
+          </div>
+          <div className="md:hidden space-y-3">
+            {Array.from({ length: 3 }).map((_, i) => <SkeletonListCard key={i} />)}
+          </div>
+        </>
       ) : candidatures.length === 0 ? (
-        <div className="bg-white border border-slate-200/70 rounded-2xl px-5 py-10 text-center shadow-sm">
-          <p className="text-sm text-slate-400">Aucune candidature trouvee.</p>
+        <div className="bg-white border border-slate-200/70 rounded-2xl px-5 py-14 text-center shadow-sm">
+          <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3">
+            <Inbox size={20} className="text-slate-400" />
+          </div>
+          <p className="text-sm font-medium text-slate-600">Aucune candidature ici</p>
+          <p className="text-xs text-slate-400 mt-1">Les nouvelles candidatures apparaitront dans cette liste.</p>
         </div>
       ) : (
         <>
@@ -180,6 +196,7 @@ export default function Candidatures() {
           onClose={() => setCandidatureAAffecter(null)}
           onSuccess={() => {
             setCandidatureAAffecter(null);
+            toast.success("Stagiaire affecte avec succes.");
             charger();
           }}
         />
