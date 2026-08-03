@@ -1,5 +1,8 @@
+import { useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
+import { Menu } from "lucide-react";
 import Sidebar from "./components/Sidebar";
+import UserMenu from "./components/UserMenu";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
 import Inscription from "./pages/Inscription";
@@ -33,6 +36,28 @@ function RequireRH({ children }) {
   return children;
 }
 
+function RHLayout({ children }) {
+  const [drawerOuvert, setDrawerOuvert] = useState(false);
+
+  return (
+    <div className="flex min-h-screen bg-[#F7F8FA]">
+      <Sidebar open={drawerOuvert} onClose={() => setDrawerOuvert(false)} />
+
+      <div className="flex-1 flex flex-col min-w-0">
+        <header className="lg:hidden flex items-center justify-between bg-white border-b border-slate-200 px-4 py-3 sticky top-0 z-20">
+          <button onClick={() => setDrawerOuvert(true)} className="p-1.5 text-mae-blue">
+            <Menu size={22} />
+          </button>
+          <span className="font-display font-bold text-sm text-mae-blue">MAE Assurances</span>
+          <UserMenu />
+        </header>
+
+        {children}
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   return (
     <Routes>
@@ -62,8 +87,7 @@ export default function App() {
         element={
           <RequireAuth>
             <RequireRH>
-              <div className="flex min-h-screen bg-[#F7F8FA]">
-                <Sidebar />
+              <RHLayout>
                 <Routes>
                   <Route path="/" element={<Dashboard />} />
                   <Route path="/candidatures" element={<Candidatures />} />
@@ -72,7 +96,7 @@ export default function App() {
                   <Route path="/evaluations" element={<Evaluations />} />
                   <Route path="/departements" element={<Departements />} />
                 </Routes>
-              </div>
+              </RHLayout>
             </RequireRH>
           </RequireAuth>
         }

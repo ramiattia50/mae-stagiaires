@@ -41,22 +41,22 @@ export default function AffectationForm({ candidature, onClose, onSuccess }) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-      <form onSubmit={handleSubmit} className="bg-white rounded-xl p-6 w-96 shadow-xl">
+    <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-5 sm:p-6 w-full max-w-sm shadow-xl">
         <h2 className="font-display text-lg font-bold text-mae-blue mb-1">Affecter le stagiaire</h2>
         <p className="text-sm text-slate-500 mb-4">
           {candidature.candidat?.prenom} {candidature.candidat?.nom}
         </p>
 
         {erreur && (
-          <div className="mb-3 px-3 py-2 rounded-lg bg-red-50 text-red-600 text-sm">{erreur}</div>
+          <div className="mb-3 px-3 py-2.5 rounded-xl bg-red-50 text-red-600 text-sm">{erreur}</div>
         )}
 
-        <label className="block text-sm text-slate-600 mb-1">Departement</label>
+        <label className="block text-sm text-slate-600 mb-1.5">Departement</label>
         <select
           value={departementId}
           onChange={(e) => setDepartementId(e.target.value)}
-          className="w-full border border-slate-300 rounded-lg px-3 py-2 mb-3 text-sm"
+          className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 mb-3 text-sm"
         >
           <option value="">Choisir...</option>
           {departements.map((d) => (
@@ -64,11 +64,11 @@ export default function AffectationForm({ candidature, onClose, onSuccess }) {
           ))}
         </select>
 
-        <label className="block text-sm text-slate-600 mb-1">Tuteur</label>
+        <label className="block text-sm text-slate-600 mb-1.5">Tuteur</label>
         <select
           value={tuteurId}
           onChange={(e) => setTuteurId(e.target.value)}
-          className="w-full border border-slate-300 rounded-lg px-3 py-2 mb-3 text-sm"
+          className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 mb-3 text-sm"
         >
           <option value="">Choisir...</option>
           {tuteurs.map((t) => (
@@ -78,21 +78,21 @@ export default function AffectationForm({ candidature, onClose, onSuccess }) {
 
         <div className="flex gap-2 mb-4">
           <div className="flex-1">
-            <label className="block text-sm text-slate-600 mb-1">Debut</label>
+            <label className="block text-sm text-slate-600 mb-1.5">Debut</label>
             <input
               type="date"
               value={dateDebut}
               onChange={(e) => setDateDebut(e.target.value)}
-              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"
+              className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm"
             />
           </div>
           <div className="flex-1">
-            <label className="block text-sm text-slate-600 mb-1">Fin</label>
+            <label className="block text-sm text-slate-600 mb-1.5">Fin</label>
             <input
               type="date"
               value={dateFin}
               onChange={(e) => setDateFin(e.target.value)}
-              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"
+              className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm"
             />
           </div>
         </div>
@@ -101,14 +101,14 @@ export default function AffectationForm({ candidature, onClose, onSuccess }) {
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 border border-slate-300 rounded-lg py-2 text-sm font-medium text-slate-600"
+            className="flex-1 border border-slate-300 rounded-xl py-2.5 text-sm font-medium text-slate-600"
           >
             Annuler
           </button>
           <button
             type="submit"
             disabled={enCours}
-            className="flex-1 bg-mae-blue text-white rounded-lg py-2 text-sm font-medium disabled:opacity-50"
+            className="flex-1 bg-mae-blue text-white rounded-xl py-2.5 text-sm font-medium disabled:opacity-50 active:scale-[0.98] transition-transform"
           >
             Confirmer
           </button>

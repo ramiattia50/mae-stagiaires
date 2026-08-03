@@ -18,6 +18,51 @@ function StatutCandidatureBadge({ statut }) {
   );
 }
 
+function Actions({ c, actionEnCours, changerStatut, setCandidatureAAffecter }) {
+  if (c.statut === "DEPOSEE") {
+    return (
+      <button
+        disabled={actionEnCours === c.id}
+        onClick={() => changerStatut(c.id, "EN_COURS_ETUDE")}
+        className="text-xs text-mae-teal font-medium disabled:opacity-50"
+      >
+        Etudier
+      </button>
+    );
+  }
+  if (c.statut === "EN_COURS_ETUDE") {
+    return (
+      <div className="flex gap-3">
+        <button
+          disabled={actionEnCours === c.id}
+          onClick={() => changerStatut(c.id, "ACCEPTEE")}
+          className="text-xs text-mae-teal font-medium disabled:opacity-50"
+        >
+          Accepter
+        </button>
+        <button
+          disabled={actionEnCours === c.id}
+          onClick={() => changerStatut(c.id, "REFUSEE")}
+          className="text-xs text-red-600 font-medium disabled:opacity-50"
+        >
+          Refuser
+        </button>
+      </div>
+    );
+  }
+  if (c.statut === "ACCEPTEE" && !c.stagiaire) {
+    return (
+      <button onClick={() => setCandidatureAAffecter(c)} className="text-xs text-mae-blue font-medium underline">
+        Affecter
+      </button>
+    );
+  }
+  if (c.statut === "ACCEPTEE" && c.stagiaire) {
+    return <span className="text-xs text-slate-400">Deja affecte</span>;
+  }
+  return null;
+}
+
 export default function Candidatures() {
   const [candidatures, setCandidatures] = useState([]);
   const [filtreStatut, setFiltreStatut] = useState("");
@@ -51,108 +96,83 @@ export default function Candidatures() {
   }
 
   return (
-    <main className="flex-1 px-8 py-7 overflow-auto">
-      <div className="mb-6">
-        <h1 className="font-display text-[22px] font-bold text-mae-blue">Candidatures</h1>
+    <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 lg:py-7 overflow-auto">
+      <div className="mb-5">
+        <h1 className="font-display text-xl lg:text-[22px] font-bold text-mae-blue">Candidatures</h1>
         <p className="text-sm text-slate-500 mt-0.5">{candidatures.length} candidature(s)</p>
       </div>
 
-      <div className="flex gap-3 mb-5">
-        <select
-          value={filtreStatut}
-          onChange={(e) => setFiltreStatut(e.target.value)}
-          className="border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white"
-        >
-          <option value="">Tous les statuts</option>
-          <option value="DEPOSEE">Deposee</option>
-          <option value="EN_COURS_ETUDE">En cours detude</option>
-          <option value="ACCEPTEE">Acceptee</option>
-          <option value="REFUSEE">Refusee</option>
-        </select>
-      </div>
+      <select
+        value={filtreStatut}
+        onChange={(e) => setFiltreStatut(e.target.value)}
+        className="border border-slate-300 rounded-xl px-3 py-2 text-sm bg-white mb-5 w-full sm:w-auto"
+      >
+        <option value="">Tous les statuts</option>
+        <option value="DEPOSEE">Deposee</option>
+        <option value="EN_COURS_ETUDE">En cours detude</option>
+        <option value="ACCEPTEE">Acceptee</option>
+        <option value="REFUSEE">Refusee</option>
+      </select>
 
-      <div className="bg-white border border-slate-200 rounded-xl px-5 py-5">
-        {loading ? (
-          <p className="text-sm text-slate-400">Chargement...</p>
-        ) : (
-          <table className="w-full border-collapse">
-            <thead>
-              <tr>
-                {["Candidat", "Type de stage", "Sujet", "Depose le", "Statut", "Actions"].map((h) => (
-                  <th key={h} className="text-left text-[11px] font-semibold text-slate-400 uppercase tracking-wide px-2.5 py-2 border-b border-slate-100">
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {candidatures.length === 0 ? (
+      {loading ? (
+        <p className="text-sm text-slate-400">Chargement...</p>
+      ) : candidatures.length === 0 ? (
+        <div className="bg-white border border-slate-200/70 rounded-2xl px-5 py-10 text-center shadow-sm">
+          <p className="text-sm text-slate-400">Aucune candidature trouvee.</p>
+        </div>
+      ) : (
+        <>
+          <div className="hidden md:block bg-white border border-slate-200/70 rounded-2xl px-5 py-5 shadow-sm overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
                 <tr>
-                  <td colSpan={6} className="text-center text-sm text-slate-400 py-6">
-                    Aucune candidature trouvee.
-                  </td>
+                  {["Candidat", "Type de stage", "Sujet", "Depose le", "Statut", "Actions"].map((h) => (
+                    <th key={h} className="text-left text-[11px] font-semibold text-slate-400 uppercase tracking-wide px-2.5 py-2 border-b border-slate-100 whitespace-nowrap">
+                      {h}
+                    </th>
+                  ))}
                 </tr>
-              ) : (
-                candidatures.map((c) => (
+              </thead>
+              <tbody>
+                {candidatures.map((c) => (
                   <tr key={c.id}>
-                    <td className="px-2.5 py-2.5 text-sm text-mae-blue font-medium border-b border-slate-50">
+                    <td className="px-2.5 py-2.5 text-sm text-mae-blue font-medium border-b border-slate-50 whitespace-nowrap">
                       {c.candidat?.prenom} {c.candidat?.nom}
                     </td>
-                    <td className="px-2.5 py-2.5 text-sm text-slate-600 border-b border-slate-50">{c.typeStage}</td>
+                    <td className="px-2.5 py-2.5 text-sm text-slate-600 border-b border-slate-50 whitespace-nowrap">{c.typeStage}</td>
                     <td className="px-2.5 py-2.5 text-sm text-slate-600 border-b border-slate-50">{c.sujetStage ?? "-"}</td>
-                    <td className="px-2.5 py-2.5 text-sm text-slate-600 border-b border-slate-50">
+                    <td className="px-2.5 py-2.5 text-sm text-slate-600 border-b border-slate-50 whitespace-nowrap">
                       {new Date(c.dateDepot).toLocaleDateString("fr-FR")}
                     </td>
                     <td className="px-2.5 py-2.5 border-b border-slate-50">
                       <StatutCandidatureBadge statut={c.statut} />
                     </td>
-                    <td className="px-2.5 py-2.5 border-b border-slate-50">
-                      {c.statut === "DEPOSEE" && (
-                        <button
-                          disabled={actionEnCours === c.id}
-                          onClick={() => changerStatut(c.id, "EN_COURS_ETUDE")}
-                          className="text-xs text-mae-teal font-medium disabled:opacity-50"
-                        >
-                          Etudier
-                        </button>
-                      )}
-                      {c.statut === "EN_COURS_ETUDE" && (
-                        <div className="flex gap-3">
-                          <button
-                            disabled={actionEnCours === c.id}
-                            onClick={() => changerStatut(c.id, "ACCEPTEE")}
-                            className="text-xs text-mae-teal font-medium disabled:opacity-50"
-                          >
-                            Accepter
-                          </button>
-                          <button
-                            disabled={actionEnCours === c.id}
-                            onClick={() => changerStatut(c.id, "REFUSEE")}
-                            className="text-xs text-red-600 font-medium disabled:opacity-50"
-                          >
-                            Refuser
-                          </button>
-                        </div>
-                      )}
-                      {c.statut === "ACCEPTEE" && !c.stagiaire && (
-                        <button
-                          onClick={() => setCandidatureAAffecter(c)}
-                          className="text-xs text-mae-blue font-medium underline"
-                        >
-                          Affecter
-                        </button>
-                      )}
-                      {c.statut === "ACCEPTEE" && c.stagiaire && (
-                        <span className="text-xs text-slate-400">Deja affecte</span>
-                      )}
+                    <td className="px-2.5 py-2.5 border-b border-slate-50 whitespace-nowrap">
+                      <Actions c={c} actionEnCours={actionEnCours} changerStatut={changerStatut} setCandidatureAAffecter={setCandidatureAAffecter} />
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        )}
-      </div>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="md:hidden space-y-3">
+            {candidatures.map((c) => (
+              <div key={c.id} className="bg-white border border-slate-200/70 rounded-2xl px-4 py-4 shadow-sm">
+                <div className="flex justify-between items-start mb-1.5">
+                  <p className="text-sm font-medium text-mae-blue">{c.candidat?.prenom} {c.candidat?.nom}</p>
+                  <StatutCandidatureBadge statut={c.statut} />
+                </div>
+                <p className="text-xs text-slate-500">{c.typeStage} - {c.sujetStage ?? "Sans sujet"}</p>
+                <p className="text-xs text-slate-400 mt-0.5 mb-3">Depose le {new Date(c.dateDepot).toLocaleDateString("fr-FR")}</p>
+                <div className="pt-2 border-t border-slate-100">
+                  <Actions c={c} actionEnCours={actionEnCours} changerStatut={changerStatut} setCandidatureAAffecter={setCandidatureAAffecter} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
 
       {candidatureAAffecter && (
         <AffectationForm

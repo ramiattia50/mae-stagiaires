@@ -16,6 +16,28 @@ function ValidationBadge({ statut }) {
   );
 }
 
+function Actions({ e, actionEnCours, valider }) {
+  if (e.statutValidation !== "EN_ATTENTE") return null;
+  return (
+    <div className="flex gap-3">
+      <button
+        disabled={actionEnCours === e.id}
+        onClick={() => valider(e.id, "VALIDEE")}
+        className="text-xs text-mae-teal font-medium disabled:opacity-50"
+      >
+        Valider
+      </button>
+      <button
+        disabled={actionEnCours === e.id}
+        onClick={() => valider(e.id, "REJETEE_POUR_REVISION")}
+        className="text-xs text-red-600 font-medium disabled:opacity-50"
+      >
+        Renvoyer
+      </button>
+    </div>
+  );
+}
+
 export default function Evaluations() {
   const [evaluations, setEvaluations] = useState([]);
   const [filtre, setFiltre] = useState("EN_ATTENTE");
@@ -48,97 +70,97 @@ export default function Evaluations() {
   }
 
   return (
-    <main className="flex-1 px-8 py-7 overflow-auto">
-      <div className="mb-6">
-        <h1 className="font-display text-[22px] font-bold text-mae-blue">Evaluations</h1>
+    <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 lg:py-7 overflow-auto">
+      <div className="mb-5">
+        <h1 className="font-display text-xl lg:text-[22px] font-bold text-mae-blue">Evaluations</h1>
         <p className="text-sm text-slate-500 mt-0.5">{evaluations.length} evaluation(s)</p>
       </div>
 
-      <div className="flex gap-3 mb-5">
-        <select
-          value={filtre}
-          onChange={(e) => setFiltre(e.target.value)}
-          className="border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white"
-        >
-          <option value="">Toutes</option>
-          <option value="EN_ATTENTE">En attente</option>
-          <option value="VALIDEE">Validee</option>
-          <option value="REJETEE_POUR_REVISION">A revoir</option>
-        </select>
-      </div>
+      <select
+        value={filtre}
+        onChange={(e) => setFiltre(e.target.value)}
+        className="border border-slate-300 rounded-xl px-3 py-2 text-sm bg-white mb-5 w-full sm:w-auto"
+      >
+        <option value="">Toutes</option>
+        <option value="EN_ATTENTE">En attente</option>
+        <option value="VALIDEE">Validee</option>
+        <option value="REJETEE_POUR_REVISION">A revoir</option>
+      </select>
 
-      <div className="bg-white border border-slate-200 rounded-xl px-5 py-5">
-        {loading ? (
-          <p className="text-sm text-slate-400">Chargement...</p>
-        ) : (
-          <table className="w-full border-collapse">
-            <thead>
-              <tr>
-                {["Stagiaire", "Departement", "Tuteur", "Note", "Date", "Statut", "Actions"].map((h) => (
-                  <th key={h} className="text-left text-[11px] font-semibold text-slate-400 uppercase tracking-wide px-2.5 py-2 border-b border-slate-100">
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {evaluations.length === 0 ? (
+      {loading ? (
+        <p className="text-sm text-slate-400">Chargement...</p>
+      ) : evaluations.length === 0 ? (
+        <div className="bg-white border border-slate-200/70 rounded-2xl px-5 py-10 text-center shadow-sm">
+          <p className="text-sm text-slate-400">Aucune evaluation trouvee.</p>
+        </div>
+      ) : (
+        <>
+          <div className="hidden md:block bg-white border border-slate-200/70 rounded-2xl px-5 py-5 shadow-sm overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
                 <tr>
-                  <td colSpan={7} className="text-center text-sm text-slate-400 py-6">
-                    Aucune evaluation trouvee.
-                  </td>
+                  {["Stagiaire", "Departement", "Tuteur", "Note", "Date", "Statut", "Actions"].map((h) => (
+                    <th key={h} className="text-left text-[11px] font-semibold text-slate-400 uppercase tracking-wide px-2.5 py-2 border-b border-slate-100 whitespace-nowrap">
+                      {h}
+                    </th>
+                  ))}
                 </tr>
-              ) : (
-                evaluations.map((e) => {
+              </thead>
+              <tbody>
+                {evaluations.map((e) => {
                   const candidat = e.stagiaire?.candidature?.candidat;
                   return (
                     <tr key={e.id}>
-                      <td className="px-2.5 py-2.5 text-sm text-mae-blue font-medium border-b border-slate-50">
+                      <td className="px-2.5 py-2.5 text-sm text-mae-blue font-medium border-b border-slate-50 whitespace-nowrap">
                         {candidat?.prenom} {candidat?.nom}
                       </td>
-                      <td className="px-2.5 py-2.5 text-sm text-slate-600 border-b border-slate-50">
+                      <td className="px-2.5 py-2.5 text-sm text-slate-600 border-b border-slate-50 whitespace-nowrap">
                         {e.stagiaire?.departement?.nom}
                       </td>
-                      <td className="px-2.5 py-2.5 text-sm text-slate-600 border-b border-slate-50">
+                      <td className="px-2.5 py-2.5 text-sm text-slate-600 border-b border-slate-50 whitespace-nowrap">
                         {e.tuteur?.prenom} {e.tuteur?.nom}
                       </td>
-                      <td className="px-2.5 py-2.5 text-sm text-slate-600 border-b border-slate-50">
+                      <td className="px-2.5 py-2.5 text-sm text-slate-600 border-b border-slate-50 whitespace-nowrap">
                         {e.note ?? "-"} / 20
                       </td>
-                      <td className="px-2.5 py-2.5 text-sm text-slate-600 border-b border-slate-50">
+                      <td className="px-2.5 py-2.5 text-sm text-slate-600 border-b border-slate-50 whitespace-nowrap">
                         {new Date(e.dateEvaluation).toLocaleDateString("fr-FR")}
                       </td>
                       <td className="px-2.5 py-2.5 border-b border-slate-50">
                         <ValidationBadge statut={e.statutValidation} />
                       </td>
-                      <td className="px-2.5 py-2.5 border-b border-slate-50">
-                        {e.statutValidation === "EN_ATTENTE" && (
-                          <div className="flex gap-3">
-                            <button
-                              disabled={actionEnCours === e.id}
-                              onClick={() => valider(e.id, "VALIDEE")}
-                              className="text-xs text-mae-teal font-medium disabled:opacity-50"
-                            >
-                              Valider
-                            </button>
-                            <button
-                              disabled={actionEnCours === e.id}
-                              onClick={() => valider(e.id, "REJETEE_POUR_REVISION")}
-                              className="text-xs text-red-600 font-medium disabled:opacity-50"
-                            >
-                              Renvoyer
-                            </button>
-                          </div>
-                        )}
+                      <td className="px-2.5 py-2.5 border-b border-slate-50 whitespace-nowrap">
+                        <Actions e={e} actionEnCours={actionEnCours} valider={valider} />
                       </td>
                     </tr>
                   );
-                })
-              )}
-            </tbody>
-          </table>
-        )}
-      </div>
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="md:hidden space-y-3">
+            {evaluations.map((e) => {
+              const candidat = e.stagiaire?.candidature?.candidat;
+              return (
+                <div key={e.id} className="bg-white border border-slate-200/70 rounded-2xl px-4 py-4 shadow-sm">
+                  <div className="flex justify-between items-start mb-1.5">
+                    <p className="text-sm font-medium text-mae-blue">{candidat?.prenom} {candidat?.nom}</p>
+                    <ValidationBadge statut={e.statutValidation} />
+                  </div>
+                  <p className="text-xs text-slate-500">{e.stagiaire?.departement?.nom} - Tuteur : {e.tuteur?.prenom} {e.tuteur?.nom}</p>
+                  <p className="text-xs text-slate-400 mt-0.5 mb-3">
+                    Note : <span className="font-medium text-mae-blue">{e.note ?? "-"} / 20</span> - {new Date(e.dateEvaluation).toLocaleDateString("fr-FR")}
+                  </p>
+                  <div className="pt-2 border-t border-slate-100">
+                    <Actions e={e} actionEnCours={actionEnCours} valider={valider} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </>
+      )}
     </main>
   );
 }

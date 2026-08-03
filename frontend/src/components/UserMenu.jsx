@@ -43,15 +43,15 @@ export default function UserMenu() {
         onClick={() => setOuvert((v) => !v)}
         className="flex items-center gap-2 cursor-pointer"
       >
-        <div className="w-8 h-8 rounded-full bg-mae-teal text-white flex items-center justify-center text-xs font-semibold font-display">
+        <div className="w-9 h-9 rounded-full bg-mae-teal text-white flex items-center justify-center text-xs font-semibold font-display shadow-sm">
           {initiales}
         </div>
-        <ChevronDown size={14} className="text-slate-500" />
+        <ChevronDown size={14} className="text-slate-500 hidden sm:block" />
       </button>
 
       {ouvert && (
-        <div className="absolute right-0 mt-2 w-56 bg-white border border-slate-200 rounded-lg shadow-lg py-2 z-10">
-          <div className="px-4 py-2 border-b border-slate-100">
+        <div className="absolute right-0 mt-2 w-56 bg-white border border-slate-200 rounded-2xl shadow-lg py-2 z-50">
+          <div className="px-4 py-2.5 border-b border-slate-100">
             <p className="text-sm font-medium text-mae-blue">
               {utilisateur.prenom} {utilisateur.nom}
             </p>
@@ -59,7 +59,7 @@ export default function UserMenu() {
           </div>
           <button
             onClick={handleDeconnexion}
-            className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 text-left"
+            className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 text-left transition-colors"
           >
             <LogOut size={14} />
             Se deconnecter

@@ -89,25 +89,25 @@ export default function EspaceCandidat() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <header className="bg-white border-b border-slate-200 px-8 py-4 flex justify-between items-center">
+      <header className="bg-white border-b border-slate-200 px-4 sm:px-8 py-3.5 sm:py-4 flex justify-between items-center sticky top-0 z-10">
         <div>
-          <p className="font-display font-bold text-mae-blue">MAE Assurances</p>
+          <p className="font-display font-bold text-mae-blue text-sm sm:text-base">MAE Assurances</p>
           <p className="text-xs text-slate-400">Espace candidat</p>
         </div>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-slate-600">{utilisateur?.prenom} {utilisateur?.nom}</span>
+        <div className="flex items-center gap-2 sm:gap-4">
+          <span className="hidden sm:inline text-sm text-slate-600">{utilisateur?.prenom} {utilisateur?.nom}</span>
           <button onClick={handleDeconnexion} className="text-xs text-red-600 font-medium">
-            Se deconnecter
+            Deconnexion
           </button>
         </div>
       </header>
 
-      <main className="max-w-3xl mx-auto px-8 py-8">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="font-display text-xl font-bold text-mae-blue">Mes candidatures</h1>
+      <main className="max-w-3xl mx-auto px-4 sm:px-8 py-6 sm:py-8">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
+          <h1 className="font-display text-lg sm:text-xl font-bold text-mae-blue">Mes candidatures</h1>
           <button
             onClick={() => setAfficherForm(true)}
-            className="bg-mae-blue text-white rounded-lg px-4 py-2 text-sm font-medium"
+            className="bg-mae-blue text-white rounded-xl px-4 py-2.5 text-sm font-medium active:scale-[0.98] transition-transform"
           >
             Deposer une candidature
           </button>
@@ -116,14 +116,14 @@ export default function EspaceCandidat() {
         {loading ? (
           <p className="text-sm text-slate-400">Chargement...</p>
         ) : candidatures.length === 0 ? (
-          <div className="bg-white border border-slate-200 rounded-xl px-5 py-10 text-center">
+          <div className="bg-white border border-slate-200/70 rounded-2xl px-5 py-10 text-center shadow-sm">
             <p className="text-sm text-slate-400">Vous navez pas encore depose de candidature.</p>
           </div>
         ) : (
           <div className="space-y-3">
             {candidatures.map((c) => (
-              <div key={c.id} className="bg-white border border-slate-200 rounded-xl px-5 py-4">
-                <div className="flex justify-between items-center">
+              <div key={c.id} className="bg-white border border-slate-200/70 rounded-2xl px-4 sm:px-5 py-4 shadow-sm">
+                <div className="flex justify-between items-start gap-2">
                   <div>
                     <p className="text-sm font-medium text-mae-blue">{c.sujetStage || c.typeStage}</p>
                     <p className="text-xs text-slate-400 mt-0.5">
@@ -133,7 +133,7 @@ export default function EspaceCandidat() {
                   <StatutBadge statut={c.statut} />
                 </div>
                 {c.piecesJointes?.length > 0 && (
-                  <div className="mt-3 pt-3 border-t border-slate-100 flex gap-4">
+                  <div className="mt-3 pt-3 border-t border-slate-100 flex flex-wrap gap-3">
                     {c.piecesJointes.map((p) => (
                       <span key={p.id} className="text-xs text-slate-500">
                         {p.type === "CV" ? "CV joint" : "Lettre de motivation jointe"}
@@ -148,19 +148,19 @@ export default function EspaceCandidat() {
       </main>
 
       {afficherForm && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 py-8">
-          <form onSubmit={handleSubmit} className="bg-white rounded-xl p-6 w-96 shadow-xl max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 sm:py-8">
+          <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-5 sm:p-6 w-full max-w-sm shadow-xl max-h-[90vh] overflow-y-auto">
             <h2 className="font-display text-lg font-bold text-mae-blue mb-4">Deposer une candidature</h2>
 
             {erreur && (
-              <div className="mb-3 px-3 py-2 rounded-lg bg-red-50 text-red-600 text-sm">{erreur}</div>
+              <div className="mb-3 px-3 py-2.5 rounded-xl bg-red-50 text-red-600 text-sm">{erreur}</div>
             )}
 
-            <label className="block text-sm text-slate-600 mb-1">Type de stage</label>
+            <label className="block text-sm text-slate-600 mb-1.5">Type de stage</label>
             <select
               value={typeStage}
               onChange={(e) => setTypeStage(e.target.value)}
-              className="w-full border border-slate-300 rounded-lg px-3 py-2 mb-3 text-sm"
+              className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 mb-3 text-sm"
             >
               <option value="PFE">PFE</option>
               <option value="STAGE_ETE">Stage dete</option>
@@ -168,63 +168,63 @@ export default function EspaceCandidat() {
               <option value="ALTERNANCE">Alternance</option>
             </select>
 
-            <label className="block text-sm text-slate-600 mb-1">Sujet souhaite</label>
+            <label className="block text-sm text-slate-600 mb-1.5">Sujet souhaite</label>
             <input
               value={sujetStage}
               onChange={(e) => setSujetStage(e.target.value)}
-              className="w-full border border-slate-300 rounded-lg px-3 py-2 mb-3 text-sm"
+              className="w-full border border-slate-300 rounded-xl px-3.5 py-2.5 mb-3 text-sm"
               placeholder="Ex: Application de gestion des stagiaires"
             />
 
             <div className="flex gap-2 mb-3">
               <div className="flex-1">
-                <label className="block text-sm text-slate-600 mb-1">Debut souhaite</label>
+                <label className="block text-sm text-slate-600 mb-1.5">Debut souhaite</label>
                 <input
                   type="date"
                   value={dateDebutSouhaitee}
                   onChange={(e) => setDateDebutSouhaitee(e.target.value)}
-                  className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"
+                  className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm"
                 />
               </div>
               <div className="flex-1">
-                <label className="block text-sm text-slate-600 mb-1">Fin souhaitee</label>
+                <label className="block text-sm text-slate-600 mb-1.5">Fin souhaitee</label>
                 <input
                   type="date"
                   value={dateFinSouhaitee}
                   onChange={(e) => setDateFinSouhaitee(e.target.value)}
-                  className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"
+                  className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm"
                 />
               </div>
             </div>
 
-            <label className="block text-sm text-slate-600 mb-1">CV (PDF, DOC)</label>
+            <label className="block text-sm text-slate-600 mb-1.5">CV (PDF, DOC)</label>
             <input
               type="file"
               accept=".pdf,.doc,.docx"
               onChange={(e) => setFichierCV(e.target.files[0])}
-              className="w-full text-sm mb-3"
+              className="w-full text-xs sm:text-sm mb-3"
             />
 
-            <label className="block text-sm text-slate-600 mb-1">Lettre de motivation (PDF, DOC)</label>
+            <label className="block text-sm text-slate-600 mb-1.5">Lettre de motivation (PDF, DOC)</label>
             <input
               type="file"
               accept=".pdf,.doc,.docx"
               onChange={(e) => setFichierLettre(e.target.files[0])}
-              className="w-full text-sm mb-4"
+              className="w-full text-xs sm:text-sm mb-4"
             />
 
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={() => setAfficherForm(false)}
-                className="flex-1 border border-slate-300 rounded-lg py-2 text-sm font-medium text-slate-600"
+                className="flex-1 border border-slate-300 rounded-xl py-2.5 text-sm font-medium text-slate-600"
               >
                 Annuler
               </button>
               <button
                 type="submit"
                 disabled={enCours}
-                className="flex-1 bg-mae-blue text-white rounded-lg py-2 text-sm font-medium disabled:opacity-50"
+                className="flex-1 bg-mae-blue text-white rounded-xl py-2.5 text-sm font-medium disabled:opacity-50 active:scale-[0.98] transition-transform"
               >
                 Deposer
               </button>

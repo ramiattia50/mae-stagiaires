@@ -28,17 +28,17 @@ export default function Stagiaires() {
   }, [filtreDept, filtreStatut]);
 
   return (
-    <main className="flex-1 px-8 py-7 overflow-auto">
-      <div className="mb-6">
-        <h1 className="font-display text-[22px] font-bold text-mae-blue">Stagiaires</h1>
+    <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 lg:py-7 overflow-auto">
+      <div className="mb-5">
+        <h1 className="font-display text-xl lg:text-[22px] font-bold text-mae-blue">Stagiaires</h1>
         <p className="text-sm text-slate-500 mt-0.5">{stagiaires.length} stagiaire(s)</p>
       </div>
 
-      <div className="flex gap-3 mb-5">
+      <div className="flex flex-col sm:flex-row gap-3 mb-5">
         <select
           value={filtreDept}
           onChange={(e) => setFiltreDept(e.target.value)}
-          className="border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white"
+          className="border border-slate-300 rounded-xl px-3 py-2 text-sm bg-white"
         >
           <option value="">Tous les departements</option>
           {departements.map((d) => (
@@ -49,7 +49,7 @@ export default function Stagiaires() {
         <select
           value={filtreStatut}
           onChange={(e) => setFiltreStatut(e.target.value)}
-          className="border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white"
+          className="border border-slate-300 rounded-xl px-3 py-2 text-sm bg-white"
         >
           <option value="">Tous les statuts</option>
           <option value="A_VENIR">A venir</option>
@@ -58,59 +58,78 @@ export default function Stagiaires() {
         </select>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-xl px-5 py-5">
-        {loading ? (
-          <p className="text-sm text-slate-400">Chargement...</p>
-        ) : (
-          <table className="w-full border-collapse">
-            <thead>
-              <tr>
-                {["Nom", "Departement", "Tuteur", "Debut", "Fin", "Statut"].map((h) => (
-                  <th key={h} className="text-left text-[11px] font-semibold text-slate-400 uppercase tracking-wide px-2.5 py-2 border-b border-slate-100">
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {stagiaires.length === 0 ? (
+      {loading ? (
+        <p className="text-sm text-slate-400">Chargement...</p>
+      ) : stagiaires.length === 0 ? (
+        <div className="bg-white border border-slate-200/70 rounded-2xl px-5 py-10 text-center shadow-sm">
+          <p className="text-sm text-slate-400">Aucun stagiaire trouve.</p>
+        </div>
+      ) : (
+        <>
+          <div className="hidden md:block bg-white border border-slate-200/70 rounded-2xl px-5 py-5 shadow-sm overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
                 <tr>
-                  <td colSpan={6} className="text-center text-sm text-slate-400 py-6">
-                    Aucun stagiaire trouve.
-                  </td>
+                  {["Nom", "Departement", "Tuteur", "Debut", "Fin", "Statut"].map((h) => (
+                    <th key={h} className="text-left text-[11px] font-semibold text-slate-400 uppercase tracking-wide px-2.5 py-2 border-b border-slate-100 whitespace-nowrap">
+                      {h}
+                    </th>
+                  ))}
                 </tr>
-              ) : (
-                stagiaires.map((s) => (
+              </thead>
+              <tbody>
+                {stagiaires.map((s) => (
                   <tr
                     key={s.id}
                     onClick={() => navigate(`/stagiaires/${s.id}`)}
-                    className="cursor-pointer hover:bg-slate-50"
+                    className="cursor-pointer hover:bg-slate-50 transition-colors"
                   >
-                    <td className="px-2.5 py-2.5 text-sm text-mae-blue font-medium border-b border-slate-50">
+                    <td className="px-2.5 py-2.5 text-sm text-mae-blue font-medium border-b border-slate-50 whitespace-nowrap">
                       {s.candidature?.candidat?.prenom} {s.candidature?.candidat?.nom}
                     </td>
-                    <td className="px-2.5 py-2.5 text-sm text-slate-600 border-b border-slate-50">
+                    <td className="px-2.5 py-2.5 text-sm text-slate-600 border-b border-slate-50 whitespace-nowrap">
                       {s.departement?.nom}
                     </td>
-                    <td className="px-2.5 py-2.5 text-sm text-slate-600 border-b border-slate-50">
+                    <td className="px-2.5 py-2.5 text-sm text-slate-600 border-b border-slate-50 whitespace-nowrap">
                       {s.tuteur?.prenom} {s.tuteur?.nom}
                     </td>
-                    <td className="px-2.5 py-2.5 text-sm text-slate-600 border-b border-slate-50">
+                    <td className="px-2.5 py-2.5 text-sm text-slate-600 border-b border-slate-50 whitespace-nowrap">
                       {new Date(s.dateDebut).toLocaleDateString("fr-FR")}
                     </td>
-                    <td className="px-2.5 py-2.5 text-sm text-slate-600 border-b border-slate-50">
+                    <td className="px-2.5 py-2.5 text-sm text-slate-600 border-b border-slate-50 whitespace-nowrap">
                       {new Date(s.dateFin).toLocaleDateString("fr-FR")}
                     </td>
                     <td className="px-2.5 py-2.5 border-b border-slate-50">
                       <StatutBadge statut={s.statut} />
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        )}
-      </div>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="md:hidden space-y-3">
+            {stagiaires.map((s) => (
+              <div
+                key={s.id}
+                onClick={() => navigate(`/stagiaires/${s.id}`)}
+                className="bg-white border border-slate-200/70 rounded-2xl px-4 py-4 shadow-sm active:scale-[0.98] transition-transform"
+              >
+                <div className="flex justify-between items-start mb-1.5">
+                  <p className="text-sm font-medium text-mae-blue">
+                    {s.candidature?.candidat?.prenom} {s.candidature?.candidat?.nom}
+                  </p>
+                  <StatutBadge statut={s.statut} />
+                </div>
+                <p className="text-xs text-slate-500">{s.departement?.nom} - {s.tuteur?.prenom} {s.tuteur?.nom}</p>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  {new Date(s.dateDebut).toLocaleDateString("fr-FR")} au {new Date(s.dateFin).toLocaleDateString("fr-FR")}
+                </p>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
     </main>
   );
 }
