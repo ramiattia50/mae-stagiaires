@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Inbox } from "lucide-react";
 import api from "../api/client";
 import AffectationForm from "../components/AffectationForm";
+import ConfirmDialog from "../components/ConfirmDialog";
 import { SkeletonListCard, SkeletonRow } from "../components/Skeleton";
 import { useToast } from "../components/ToastProvider";
 
@@ -21,7 +22,7 @@ function StatutCandidatureBadge({ statut }) {
   );
 }
 
-function Actions({ c, actionEnCours, changerStatut, setCandidatureAAffecter }) {
+function Actions({ c, actionEnCours, changerStatut, setCandidatureAAffecter, demanderConfirmationRefus }) {
   if (c.statut === "DEPOSEE") {
     return (
       <button
@@ -45,7 +46,7 @@ function Actions({ c, actionEnCours, changerStatut, setCandidatureAAffecter }) {
         </button>
         <button
           disabled={actionEnCours === c.id}
-          onClick={() => changerStatut(c.id, "REFUSEE")}
+          onClick={() => demanderConfirmationRefus(c)}
           className="text-xs text-red-600 font-medium disabled:opacity-50"
         >
           Refuser
@@ -72,6 +73,7 @@ export default function Candidatures() {
   const [loading, setLoading] = useState(true);
   const [actionEnCours, setActionEnCours] = useState(null);
   const [candidatureAAffecter, setCandidatureAAffecter] = useState(null);
+  const [candidatureARefuser, setCandidatureARefuser] = useState(null);
   const toast = useToast();
 
   function charger() {
@@ -95,6 +97,21 @@ export default function Candidatures() {
       charger();
     } catch (err) {
       toast.error("Erreur lors du changement de statut.");
+    } finally {
+      setActionEnCours(null);
+    }
+  }
+
+  async function confirmerRefus() {
+    const id = candidatureARefuser.id;
+    setCandidatureARefuser(null);
+    setActionEnCours(id);
+    try {
+      await api.patch(`/candidatures/${id}/statut`, { statut: "REFUSEE" });
+      toast.success("Candidature refusee.");
+      charger();
+    } catch (err) {
+      toast.error("Erreur lors du refus.");
     } finally {
       setActionEnCours(null);
     }
@@ -164,7 +181,7 @@ export default function Candidatures() {
                       <StatutCandidatureBadge statut={c.statut} />
                     </td>
                     <td className="px-2.5 py-2.5 border-b border-slate-50 whitespace-nowrap">
-                      <Actions c={c} actionEnCours={actionEnCours} changerStatut={changerStatut} setCandidatureAAffecter={setCandidatureAAffecter} />
+                      <Actions c={c} actionEnCours={actionEnCours} changerStatut={changerStatut} setCandidatureAAffecter={setCandidatureAAffecter} demanderConfirmationRefus={setCandidatureARefuser} />
                     </td>
                   </tr>
                 ))}
@@ -182,7 +199,7 @@ export default function Candidatures() {
                 <p className="text-xs text-slate-500">{c.typeStage} - {c.sujetStage ?? "Sans sujet"}</p>
                 <p className="text-xs text-slate-400 mt-0.5 mb-3">Depose le {new Date(c.dateDepot).toLocaleDateString("fr-FR")}</p>
                 <div className="pt-2 border-t border-slate-100">
-                  <Actions c={c} actionEnCours={actionEnCours} changerStatut={changerStatut} setCandidatureAAffecter={setCandidatureAAffecter} />
+                  <Actions c={c} actionEnCours={actionEnCours} changerStatut={changerStatut} setCandidatureAAffecter={setCandidatureAAffecter} demanderConfirmationRefus={setCandidatureARefuser} />
                 </div>
               </div>
             ))}
@@ -199,6 +216,17 @@ export default function Candidatures() {
             toast.success("Stagiaire affecte avec succes.");
             charger();
           }}
+        />
+      )}
+
+      {candidatureARefuser && (
+        <ConfirmDialog
+          titre="Refuser cette candidature ?"
+          message={`La candidature de ${candidatureARefuser.candidat?.prenom} ${candidatureARefuser.candidat?.nom} sera marquee comme refusee. Cette action est visible par le candidat.`}
+          confirmLabel="Refuser"
+          danger
+          onConfirm={confirmerRefus}
+          onCancel={() => setCandidatureARefuser(null)}
         />
       )}
     </main>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ClipboardCheck } from "lucide-react";
 import api from "../api/client";
+import ConfirmDialog from "../components/ConfirmDialog";
 import { SkeletonListCard, SkeletonRow } from "../components/Skeleton";
 import { useToast } from "../components/ToastProvider";
 
@@ -19,7 +20,7 @@ function ValidationBadge({ statut }) {
   );
 }
 
-function Actions({ e, actionEnCours, valider }) {
+function Actions({ e, actionEnCours, valider, demanderConfirmationRenvoi }) {
   if (e.statutValidation !== "EN_ATTENTE") return null;
   return (
     <div className="flex gap-3">
@@ -32,7 +33,7 @@ function Actions({ e, actionEnCours, valider }) {
       </button>
       <button
         disabled={actionEnCours === e.id}
-        onClick={() => valider(e.id, "REJETEE_POUR_REVISION")}
+        onClick={() => demanderConfirmationRenvoi(e)}
         className="text-xs text-red-600 font-medium disabled:opacity-50"
       >
         Renvoyer
@@ -46,6 +47,7 @@ export default function Evaluations() {
   const [filtre, setFiltre] = useState("EN_ATTENTE");
   const [loading, setLoading] = useState(true);
   const [actionEnCours, setActionEnCours] = useState(null);
+  const [evaluationARenvoyer, setEvaluationARenvoyer] = useState(null);
   const toast = useToast();
 
   function charger() {
@@ -65,10 +67,25 @@ export default function Evaluations() {
     setActionEnCours(id);
     try {
       await api.patch(`/evaluations/${id}/validation`, { statutValidation });
-      toast.success(statutValidation === "VALIDEE" ? "Evaluation validee." : "Evaluation renvoyee pour revision.");
+      toast.success("Evaluation validee.");
       charger();
     } catch (err) {
       toast.error("Erreur lors de la validation.");
+    } finally {
+      setActionEnCours(null);
+    }
+  }
+
+  async function confirmerRenvoi() {
+    const id = evaluationARenvoyer.id;
+    setEvaluationARenvoyer(null);
+    setActionEnCours(id);
+    try {
+      await api.patch(`/evaluations/${id}/validation`, { statutValidation: "REJETEE_POUR_REVISION" });
+      toast.success("Evaluation renvoyee pour revision.");
+      charger();
+    } catch (err) {
+      toast.error("Erreur lors du renvoi.");
     } finally {
       setActionEnCours(null);
     }
@@ -146,7 +163,7 @@ export default function Evaluations() {
                         <ValidationBadge statut={e.statutValidation} />
                       </td>
                       <td className="px-2.5 py-2.5 border-b border-slate-50 whitespace-nowrap">
-                        <Actions e={e} actionEnCours={actionEnCours} valider={valider} />
+                        <Actions e={e} actionEnCours={actionEnCours} valider={valider} demanderConfirmationRenvoi={setEvaluationARenvoyer} />
                       </td>
                     </tr>
                   );
@@ -169,13 +186,24 @@ export default function Evaluations() {
                     Note : <span className="font-medium text-mae-blue">{e.note ?? "-"} / 20</span> - {new Date(e.dateEvaluation).toLocaleDateString("fr-FR")}
                   </p>
                   <div className="pt-2 border-t border-slate-100">
-                    <Actions e={e} actionEnCours={actionEnCours} valider={valider} />
+                    <Actions e={e} actionEnCours={actionEnCours} valider={valider} demanderConfirmationRenvoi={setEvaluationARenvoyer} />
                   </div>
                 </div>
               );
             })}
           </div>
         </>
+      )}
+
+      {evaluationARenvoyer && (
+        <ConfirmDialog
+          titre="Renvoyer cette evaluation ?"
+          message="Le tuteur devra soumettre une nouvelle evaluation. Cette action est irreversible."
+          confirmLabel="Renvoyer"
+          danger
+          onConfirm={confirmerRenvoi}
+          onCancel={() => setEvaluationARenvoyer(null)}
+        />
       )}
     </main>
   );

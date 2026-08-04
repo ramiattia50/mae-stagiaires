@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Users2 } from "lucide-react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { Users2, Search } from "lucide-react";
 import api from "../api/client";
 import StatutBadge from "../components/StatutBadge";
+import Pagination from "../components/Pagination";
 import { SkeletonListCard, SkeletonRow } from "../components/Skeleton";
+
+const PAR_PAGE = 8;
 
 export default function Stagiaires() {
   const [stagiaires, setStagiaires] = useState([]);
@@ -11,7 +14,10 @@ export default function Stagiaires() {
   const [filtreDept, setFiltreDept] = useState("");
   const [filtreStatut, setFiltreStatut] = useState("");
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const recherche = (searchParams.get("q") ?? "").toLowerCase();
 
   useEffect(() => {
     api.get("/departements").then((res) => setDepartements(res.data)).catch(() => {});
@@ -29,12 +35,30 @@ export default function Stagiaires() {
       .finally(() => setLoading(false));
   }, [filtreDept, filtreStatut]);
 
+  useEffect(() => setPage(1), [filtreDept, filtreStatut, recherche]);
+
+  const filtres = stagiaires.filter((s) => {
+    if (!recherche) return true;
+    const nomComplet = `${s.candidature?.candidat?.prenom ?? ""} ${s.candidature?.candidat?.nom ?? ""}`.toLowerCase();
+    return nomComplet.includes(recherche);
+  });
+
+  const totalPages = Math.max(1, Math.ceil(filtres.length / PAR_PAGE));
+  const pageActuelle = filtres.slice((page - 1) * PAR_PAGE, page * PAR_PAGE);
+
   return (
     <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 lg:py-7 overflow-auto">
       <div className="mb-5">
         <h1 className="font-display text-xl lg:text-[22px] font-bold text-mae-blue">Stagiaires</h1>
-        <p className="text-sm text-slate-500 mt-0.5">{stagiaires.length} stagiaire(s)</p>
+        <p className="text-sm text-slate-500 mt-0.5">{filtres.length} stagiaire(s)</p>
       </div>
+
+      {recherche && (
+        <div className="flex items-center gap-2 mb-4 px-3.5 py-2 bg-mae-teal/10 rounded-xl text-sm text-mae-blue w-fit">
+          <Search size={14} />
+          Resultats pour "{recherche}"
+        </div>
+      )}
 
       <div className="flex flex-col sm:flex-row gap-3 mb-5">
         <select
@@ -69,13 +93,13 @@ export default function Stagiaires() {
             {Array.from({ length: 3 }).map((_, i) => <SkeletonListCard key={i} />)}
           </div>
         </>
-      ) : stagiaires.length === 0 ? (
+      ) : filtres.length === 0 ? (
         <div className="bg-white border border-slate-200/70 rounded-2xl px-5 py-14 text-center shadow-sm">
           <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3">
             <Users2 size={20} className="text-slate-400" />
           </div>
           <p className="text-sm font-medium text-slate-600">Aucun stagiaire trouve</p>
-          <p className="text-xs text-slate-400 mt-1">Essayez de modifier vos filtres, ou affectez un candidat depuis les candidatures.</p>
+          <p className="text-xs text-slate-400 mt-1">Essayez de modifier vos filtres ou votre recherche.</p>
         </div>
       ) : (
         <>
@@ -91,7 +115,7 @@ export default function Stagiaires() {
                 </tr>
               </thead>
               <tbody>
-                {stagiaires.map((s) => (
+                {pageActuelle.map((s) => (
                   <tr
                     key={s.id}
                     onClick={() => navigate(`/stagiaires/${s.id}`)}
@@ -122,7 +146,7 @@ export default function Stagiaires() {
           </div>
 
           <div className="md:hidden space-y-3">
-            {stagiaires.map((s) => (
+            {pageActuelle.map((s) => (
               <div
                 key={s.id}
                 onClick={() => navigate(`/stagiaires/${s.id}`)}
@@ -141,6 +165,8 @@ export default function Stagiaires() {
               </div>
             ))}
           </div>
+
+          <Pagination page={page} totalPages={totalPages} onChange={setPage} />
         </>
       )}
     </main>

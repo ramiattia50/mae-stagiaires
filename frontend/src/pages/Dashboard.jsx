@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Search, Bell } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell,
@@ -25,6 +26,8 @@ export default function Dashboard() {
   const [stagiaires, setStagiaires] = useState([]);
   const [loading, setLoading] = useState(true);
   const [erreur, setErreur] = useState(null);
+  const [recherche, setRecherche] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function charger() {
@@ -44,6 +47,13 @@ export default function Dashboard() {
     charger();
   }, []);
 
+  function lancerRecherche(e) {
+    e.preventDefault();
+    if (recherche.trim()) {
+      navigate(`/stagiaires?q=${encodeURIComponent(recherche.trim())}`);
+    }
+  }
+
   return (
     <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 lg:py-7 overflow-auto">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
@@ -52,10 +62,15 @@ export default function Dashboard() {
           <p className="text-sm text-slate-500 mt-0.5">Vue d ensemble des stages</p>
         </div>
         <div className="hidden lg:flex items-center gap-3.5">
-          <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-xl px-3 py-2 w-56">
-            <Search size={15} className="text-slate-400" />
-            <span className="text-sm text-slate-400">Rechercher...</span>
-          </div>
+          <form onSubmit={lancerRecherche} className="flex items-center gap-2 bg-white border border-slate-200 rounded-xl px-3 py-2 w-56 focus-within:ring-2 focus-within:ring-mae-teal/40 focus-within:border-mae-teal transition-shadow">
+            <Search size={15} className="text-slate-400 shrink-0" />
+            <input
+              value={recherche}
+              onChange={(e) => setRecherche(e.target.value)}
+              placeholder="Rechercher un stagiaire..."
+              className="text-sm text-slate-700 outline-none w-full bg-transparent placeholder:text-slate-400"
+            />
+          </form>
           <button className="w-9 h-9 rounded-xl border border-slate-200 bg-white flex items-center justify-center hover:bg-slate-50 transition-colors">
             <Bell size={16} className="text-slate-500" />
           </button>
@@ -137,7 +152,7 @@ export default function Dashboard() {
           <div className="bg-white border border-slate-200/70 rounded-2xl px-5 py-5 shadow-sm">
             <div className="flex justify-between items-center mb-3.5">
               <p className="font-display text-sm font-semibold text-mae-blue">Stagiaires recents</p>
-              <button className="text-xs text-mae-teal font-medium">Voir tout</button>
+              <button onClick={() => navigate("/stagiaires")} className="text-xs text-mae-teal font-medium">Voir tout</button>
             </div>
 
             <div className="hidden sm:block overflow-x-auto">
@@ -160,7 +175,7 @@ export default function Dashboard() {
                     </tr>
                   ) : (
                     stagiaires.map((s) => (
-                      <tr key={s.id}>
+                      <tr key={s.id} onClick={() => navigate(`/stagiaires/${s.id}`)} className="cursor-pointer hover:bg-slate-50 transition-colors">
                         <td className="px-2.5 py-2.5 text-sm text-mae-blue font-medium border-b border-slate-50 whitespace-nowrap">
                           {s.candidature?.candidat?.prenom} {s.candidature?.candidat?.nom}
                         </td>
@@ -188,7 +203,7 @@ export default function Dashboard() {
                 <p className="text-sm text-slate-400 text-center py-4">Aucun stagiaire pour le moment.</p>
               ) : (
                 stagiaires.map((s) => (
-                  <div key={s.id} className="border border-slate-100 rounded-xl px-3.5 py-3">
+                  <div key={s.id} onClick={() => navigate(`/stagiaires/${s.id}`)} className="border border-slate-100 rounded-xl px-3.5 py-3">
                     <div className="flex justify-between items-start mb-1.5">
                       <p className="text-sm font-medium text-mae-blue">
                         {s.candidature?.candidat?.prenom} {s.candidature?.candidat?.nom}
