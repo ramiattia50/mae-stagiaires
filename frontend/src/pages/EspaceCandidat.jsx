@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { FolderOpen } from "lucide-react";
 import api from "../api/client";
+import { useToast } from "../components/ToastProvider";
 
 const STATUT_LABELS = {
   DEPOSEE: { label: "Deposee", color: "text-slate-500", bg: "bg-slate-100" },
@@ -23,6 +25,7 @@ export default function EspaceCandidat() {
   const [loading, setLoading] = useState(true);
   const [afficherForm, setAfficherForm] = useState(false);
   const navigate = useNavigate();
+  const toast = useToast();
 
   const utilisateurBrut = window.localStorage.getItem("mae_utilisateur");
   const utilisateur = utilisateurBrut ? JSON.parse(utilisateurBrut) : null;
@@ -79,6 +82,7 @@ export default function EspaceCandidat() {
       setDateFinSouhaitee("");
       setFichierCV(null);
       setFichierLettre(null);
+      toast.success("Candidature deposee avec succes.");
       charger();
     } catch (err) {
       setErreur("Erreur lors du depot de la candidature.");
@@ -116,8 +120,12 @@ export default function EspaceCandidat() {
         {loading ? (
           <p className="text-sm text-slate-400">Chargement...</p>
         ) : candidatures.length === 0 ? (
-          <div className="bg-white border border-slate-200/70 rounded-2xl px-5 py-10 text-center shadow-sm">
-            <p className="text-sm text-slate-400">Vous navez pas encore depose de candidature.</p>
+          <div className="bg-white border border-slate-200/70 rounded-2xl px-5 py-14 text-center shadow-sm">
+            <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3">
+              <FolderOpen size={20} className="text-slate-400" />
+            </div>
+            <p className="text-sm font-medium text-slate-600">Aucune candidature pour le moment</p>
+            <p className="text-xs text-slate-400 mt-1">Deposez votre premiere candidature pour commencer.</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -149,7 +157,7 @@ export default function EspaceCandidat() {
 
       {afficherForm && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 sm:py-8">
-          <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-5 sm:p-6 w-full max-w-sm shadow-xl max-h-[90vh] overflow-y-auto">
+          <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-5 sm:p-6 w-full max-w-sm shadow-xl max-h-[90vh] overflow-y-auto animate-[slideIn_0.2s_ease-out]">
             <h2 className="font-display text-lg font-bold text-mae-blue mb-4">Deposer une candidature</h2>
 
             {erreur && (

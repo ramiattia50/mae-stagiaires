@@ -42,7 +42,7 @@ export default function AffectationForm({ candidature, onClose, onSuccess }) {
 
   return (
     <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-5 sm:p-6 w-full max-w-sm shadow-xl">
+      <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-5 sm:p-6 w-full max-w-sm shadow-xl animate-[slideIn_0.2s_ease-out]">
         <h2 className="font-display text-lg font-bold text-mae-blue mb-1">Affecter le stagiaire</h2>
         <p className="text-sm text-slate-500 mb-4">
           {candidature.candidat?.prenom} {candidature.candidat?.nom}

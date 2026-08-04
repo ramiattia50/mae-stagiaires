@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
 import { Building2, Users } from "lucide-react";
 import api from "../api/client";
+import { SkeletonCard } from "../components/Skeleton";
+import { useToast } from "../components/ToastProvider";
 
 export default function Departements() {
   const [departements, setDepartements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [nouveauNom, setNouveauNom] = useState("");
   const [enCours, setEnCours] = useState(false);
+  const toast = useToast();
 
   function charger() {
     setLoading(true);
@@ -21,10 +24,11 @@ export default function Departements() {
     setEnCours(true);
     try {
       await api.post("/departements", { nom: nouveauNom.trim() });
+      toast.success(`Departement "${nouveauNom.trim()}" cree.`);
       setNouveauNom("");
       charger();
     } catch (err) {
-      alert("Erreur lors de la creation du departement.");
+      toast.error("Erreur lors de la creation du departement.");
     } finally {
       setEnCours(false);
     }
@@ -55,7 +59,9 @@ export default function Departements() {
       </form>
 
       {loading ? (
-        <p className="text-sm text-slate-400">Chargement...</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {Array.from({ length: 3 }).map((_, i) => <SkeletonCard key={i} />)}
+        </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {departements.map((d) => (

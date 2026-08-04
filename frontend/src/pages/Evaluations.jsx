@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
+import { ClipboardCheck } from "lucide-react";
 import api from "../api/client";
+import { SkeletonListCard, SkeletonRow } from "../components/Skeleton";
+import { useToast } from "../components/ToastProvider";
 
 const VALIDATION_LABELS = {
   EN_ATTENTE: { label: "En attente", color: "text-amber-600", bg: "bg-amber-50" },
@@ -43,6 +46,7 @@ export default function Evaluations() {
   const [filtre, setFiltre] = useState("EN_ATTENTE");
   const [loading, setLoading] = useState(true);
   const [actionEnCours, setActionEnCours] = useState(null);
+  const toast = useToast();
 
   function charger() {
     setLoading(true);
@@ -61,9 +65,10 @@ export default function Evaluations() {
     setActionEnCours(id);
     try {
       await api.patch(`/evaluations/${id}/validation`, { statutValidation });
+      toast.success(statutValidation === "VALIDEE" ? "Evaluation validee." : "Evaluation renvoyee pour revision.");
       charger();
     } catch (err) {
-      alert("Erreur lors de la validation.");
+      toast.error("Erreur lors de la validation.");
     } finally {
       setActionEnCours(null);
     }
@@ -88,10 +93,21 @@ export default function Evaluations() {
       </select>
 
       {loading ? (
-        <p className="text-sm text-slate-400">Chargement...</p>
+        <>
+          <div className="hidden md:block bg-white border border-slate-200/70 rounded-2xl px-5 py-2 shadow-sm">
+            {Array.from({ length: 4 }).map((_, i) => <SkeletonRow key={i} cols={7} />)}
+          </div>
+          <div className="md:hidden space-y-3">
+            {Array.from({ length: 3 }).map((_, i) => <SkeletonListCard key={i} />)}
+          </div>
+        </>
       ) : evaluations.length === 0 ? (
-        <div className="bg-white border border-slate-200/70 rounded-2xl px-5 py-10 text-center shadow-sm">
-          <p className="text-sm text-slate-400">Aucune evaluation trouvee.</p>
+        <div className="bg-white border border-slate-200/70 rounded-2xl px-5 py-14 text-center shadow-sm">
+          <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3">
+            <ClipboardCheck size={20} className="text-slate-400" />
+          </div>
+          <p className="text-sm font-medium text-slate-600">Aucune evaluation ici</p>
+          <p className="text-xs text-slate-400 mt-1">Les evaluations soumises par les tuteurs apparaitront ici.</p>
         </div>
       ) : (
         <>

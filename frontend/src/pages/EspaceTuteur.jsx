@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Users2 } from "lucide-react";
 import api from "../api/client";
 import StatutBadge from "../components/StatutBadge";
+import { useToast } from "../components/ToastProvider";
 
 export default function EspaceTuteur() {
   const [stagiaires, setStagiaires] = useState([]);
@@ -15,6 +17,7 @@ export default function EspaceTuteur() {
   const [enCours, setEnCours] = useState(false);
   const [erreur, setErreur] = useState("");
   const navigate = useNavigate();
+  const toast = useToast();
 
   const utilisateurBrut = window.localStorage.getItem("mae_utilisateur");
   const utilisateur = utilisateurBrut ? JSON.parse(utilisateurBrut) : null;
@@ -62,6 +65,7 @@ export default function EspaceTuteur() {
         commentaire,
       });
       setStagiaireAEvaluer(null);
+      toast.success("Evaluation envoyee au responsable RH.");
       charger();
     } catch (err) {
       setErreur("Erreur lors de lenvoi de levaluation.");
@@ -80,6 +84,7 @@ export default function EspaceTuteur() {
         statut: statutPresence,
       });
       setStagiaireAPointer(null);
+      toast.success("Presence enregistree.");
       charger();
     } catch (err) {
       setErreur("Erreur lors de lenregistrement de la presence.");
@@ -109,8 +114,12 @@ export default function EspaceTuteur() {
         {loading ? (
           <p className="text-sm text-slate-400">Chargement...</p>
         ) : stagiaires.length === 0 ? (
-          <div className="bg-white border border-slate-200/70 rounded-2xl px-5 py-10 text-center shadow-sm">
-            <p className="text-sm text-slate-400">Aucun stagiaire ne vous est encore affecte.</p>
+          <div className="bg-white border border-slate-200/70 rounded-2xl px-5 py-14 text-center shadow-sm">
+            <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3">
+              <Users2 size={20} className="text-slate-400" />
+            </div>
+            <p className="text-sm font-medium text-slate-600">Aucun stagiaire affecte</p>
+            <p className="text-xs text-slate-400 mt-1">Les stagiaires que vous encadrez apparaitront ici.</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -151,7 +160,7 @@ export default function EspaceTuteur() {
 
       {stagiaireAPointer && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <form onSubmit={soumettrePresence} className="bg-white rounded-2xl p-5 sm:p-6 w-full max-w-sm shadow-xl">
+          <form onSubmit={soumettrePresence} className="bg-white rounded-2xl p-5 sm:p-6 w-full max-w-sm shadow-xl animate-[slideIn_0.2s_ease-out]">
             <h2 className="font-display text-lg font-bold text-mae-blue mb-1">Pointer la presence</h2>
             <p className="text-sm text-slate-500 mb-4">
               {stagiaireAPointer.candidature?.candidat?.prenom} {stagiaireAPointer.candidature?.candidat?.nom}
@@ -203,7 +212,7 @@ export default function EspaceTuteur() {
 
       {stagiaireAEvaluer && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <form onSubmit={soumettreEvaluation} className="bg-white rounded-2xl p-5 sm:p-6 w-full max-w-sm shadow-xl">
+          <form onSubmit={soumettreEvaluation} className="bg-white rounded-2xl p-5 sm:p-6 w-full max-w-sm shadow-xl animate-[slideIn_0.2s_ease-out]">
             <h2 className="font-display text-lg font-bold text-mae-blue mb-1">Evaluer le stagiaire</h2>
             <p className="text-sm text-slate-500 mb-4">
               {stagiaireAEvaluer.candidature?.candidat?.prenom} {stagiaireAEvaluer.candidature?.candidat?.nom}

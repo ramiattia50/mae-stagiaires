@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Users2 } from "lucide-react";
 import api from "../api/client";
 import StatutBadge from "../components/StatutBadge";
+import { SkeletonListCard, SkeletonRow } from "../components/Skeleton";
 
 export default function Stagiaires() {
   const [stagiaires, setStagiaires] = useState([]);
@@ -59,10 +61,21 @@ export default function Stagiaires() {
       </div>
 
       {loading ? (
-        <p className="text-sm text-slate-400">Chargement...</p>
+        <>
+          <div className="hidden md:block bg-white border border-slate-200/70 rounded-2xl px-5 py-2 shadow-sm">
+            {Array.from({ length: 4 }).map((_, i) => <SkeletonRow key={i} cols={6} />)}
+          </div>
+          <div className="md:hidden space-y-3">
+            {Array.from({ length: 3 }).map((_, i) => <SkeletonListCard key={i} />)}
+          </div>
+        </>
       ) : stagiaires.length === 0 ? (
-        <div className="bg-white border border-slate-200/70 rounded-2xl px-5 py-10 text-center shadow-sm">
-          <p className="text-sm text-slate-400">Aucun stagiaire trouve.</p>
+        <div className="bg-white border border-slate-200/70 rounded-2xl px-5 py-14 text-center shadow-sm">
+          <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3">
+            <Users2 size={20} className="text-slate-400" />
+          </div>
+          <p className="text-sm font-medium text-slate-600">Aucun stagiaire trouve</p>
+          <p className="text-xs text-slate-400 mt-1">Essayez de modifier vos filtres, ou affectez un candidat depuis les candidatures.</p>
         </div>
       ) : (
         <>
